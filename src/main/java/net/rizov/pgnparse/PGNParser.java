@@ -185,6 +185,10 @@ public class PGNParser {
 		while ((line = br.readLine()) != null) {
 			line = line.trim();
 
+			if (line.startsWith("@")) {
+				continue;
+			}
+
 			if (line.startsWith("[")) {
 				try {
 					String tagName = line.substring(1, line.indexOf(" "));
@@ -201,7 +205,7 @@ public class PGNParser {
 			}
 		}
 
-		String[] pairs = buffer.toString().split("\\s*\\d+\\.+\\s*");
+		String[] pairs = buffer.toString().split("\\s*\\d+\\.\\s*");
 
 		for (String pair : pairs) {
 			if (pair.isEmpty()) {
@@ -303,7 +307,7 @@ public class PGNParser {
 			line = line.trim();
 			
 			if (!line.isEmpty()) {
-				buffer.append(line + "\r\n");
+				buffer.append(line + "\n");
 				
 				if (line.endsWith("1-0") || line.endsWith("0-1") || line.endsWith("1/2-1/2") || line.endsWith("*")) {
 					pgnGames.add(buffer.toString());
@@ -455,7 +459,7 @@ public class PGNParser {
 	 * @throws PGNParseException
 	 */
 	private static void handleMoveType2(PGNMove move, String strippedMove, byte color, byte[][] board) throws PGNParseException {
-		byte piece = WHITE_PAWN;
+		byte piece;
 		int tohPos = getChessATOI(strippedMove.charAt(1));
 		int tovPos = strippedMove.charAt(2) - '1';
 		int fromvPos = -1;
@@ -630,12 +634,11 @@ public class PGNParser {
 		
 		if (move.isCaptured()) {
 			if (board[tohPos][tovPos] == EMPTY) {
-				int enPassanthPos = tohPos;
 				int enPassantvPos = tovPos - (tovPos - fromvPos);
 				
-				if (board[enPassanthPos][enPassantvPos] == (byte)(-1 * BLACK_PAWN * color)) {
+				if (board[tohPos][enPassantvPos] == (byte)(-1 * BLACK_PAWN * color)) {
 					move.setEnpassantCapture(true);
-					move.setEnpassantPieceSquare(getChessCoords(enPassanthPos, enPassantvPos));
+					move.setEnpassantPieceSquare(getChessCoords(tohPos, enPassantvPos));
 				} else {
 					throw new PGNParseException(move.getFullMove() + " : " + "Enpassant capture expected!");
 				}
@@ -720,12 +723,12 @@ public class PGNParser {
 	private static String getChessCoords(int hPos, int vPos) {
 		return (char)('a' + hPos) + "" + (vPos + 1);
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param hPos
 	 * @param vPos
-	 * @param color
+	 * @param piece
 	 * @param board
 	 * @return
 	 */
@@ -793,12 +796,12 @@ public class PGNParser {
 		
 		return -1;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param hPos
 	 * @param vPos
-	 * @param fromhPos
+	 * @param fromvPos
 	 * @param piece
 	 * @param board
 	 * @param moveData
@@ -1098,5 +1101,9 @@ public class PGNParser {
 				{ WHITE_ROOK, WHITE_PAWN, EMPTY, EMPTY, EMPTY, EMPTY, BLACK_PAWN, BLACK_ROOK, },
 		};
 	}
+
+	private static byte[][] createBoard(String fen) {
+        return null;
+    }
 	
 }

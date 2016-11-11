@@ -50,7 +50,7 @@ public class PGNSource {
 		StringBuilder buffer = new StringBuilder();
 		
 		while ((line = br.readLine()) != null) {
-			buffer.append(line + "\r\n");
+			buffer.append(line + "\n");
 		}
 		
 		br.close();
