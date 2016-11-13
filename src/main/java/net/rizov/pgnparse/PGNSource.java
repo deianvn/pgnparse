@@ -64,11 +64,11 @@ public class PGNSource {
 	}
 	
 	public List<PGNGame> listGames() throws IOException, PGNParseException, MalformedMoveException {
-		List<String> pgns = PGNHelper.splitPGN(source);
+		List<String> pgns = PGNParser.splitPGN(source);
 		ArrayList<PGNGame> games = new ArrayList<PGNGame>();
 
 		for (String pgn : pgns) {
-			games.add(PGNHelper.parse(pgn));
+			games.add(PGNParser.parse(pgn));
 		}
 
 		return games;
@@ -80,12 +80,12 @@ public class PGNSource {
 			return listGames();
 		}
 
-		List<String> pgns = PGNHelper.splitPGN(source);
+		List<String> pgns = PGNParser.splitPGN(source);
 		ArrayList<PGNGame> games = new ArrayList<PGNGame>();
 
 		for (String pgn : pgns) {
 			try {
-				games.add(PGNHelper.parse(pgn));
+				games.add(PGNParser.parse(pgn));
 			} catch (PGNParseException e) {
 			} catch (MalformedMoveException e) {}
 		}

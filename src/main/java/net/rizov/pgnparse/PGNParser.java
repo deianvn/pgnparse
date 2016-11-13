@@ -21,7 +21,7 @@ import java.io.StringReader;
 import java.util.LinkedList;
 import java.util.List;
 
-public class PGNHelper {
+public class PGNParser {
 
     private static final String PAWN = "P";
 
