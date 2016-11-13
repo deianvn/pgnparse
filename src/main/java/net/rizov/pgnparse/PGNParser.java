@@ -18,10 +18,7 @@ package net.rizov.pgnparse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class PGNParser {
 	
@@ -215,8 +212,12 @@ public class PGNParser {
 			String[] rawMoves;
 			
 			if (pair.contains("{")) {
-				String[] temp = pair.split("\\s+");
-				int i = 0;
+				int commentStart = pair.indexOf('{');
+				//String[] temp = new String[] { pair.substring(0, commentStart), pair.substring(commentStart) };
+				String[] temp = pair.substring(0, commentStart).split("\\s+");
+                temp = Arrays.copyOf(temp, temp.length + 1);
+                temp[temp.length - 1] = pair.substring(commentStart);
+                int i = 0;
 				ArrayList<String> list = new ArrayList<String>();
 				
 				while (i < temp.length) {
@@ -226,16 +227,16 @@ public class PGNParser {
 						while (i < temp.length) {
 							b.append(temp[i] + " ");
 							
-							if (temp[i].endsWith("}")) {
+							if (temp[i++].endsWith("}")) {
 								break;
 							}
-							
-							i++;
 						}
+
+						//TODO check for inline comment and throw exception when i < temp.length and any more brackets are available
 						
 						list.add(b.toString().trim());
 					} else {
-						list.add(temp[i]);
+						list.add(temp[i].trim());
 					}
 					
 					i++;
