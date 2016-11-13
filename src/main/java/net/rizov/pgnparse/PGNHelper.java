@@ -130,64 +130,69 @@ public class PGNHelper {
         return game;
     }
 
+    private static int getLineEndIndex(String line, int start) {
+        int index = line.indexOf('\n', start);
+
+        if (index == -1) {
+            index = line.length();
+        }
+
+        return index;
+    }
+
     private static void parse(PGNMoveContainer container, String pgn, int[] color, byte[][] board) throws IOException, PGNParseException, MalformedMoveException {
 
         StringBuilder token = new StringBuilder();
-        BufferedReader br = new BufferedReader(new StringReader(pgn));
-        String notationLine;
 
-        while ((notationLine = br.readLine()) != null) {
-            token.delete(0, token.length());
+        for (int i = 0; i < pgn.length(); i++) {
 
-            for (int i = 0; i < notationLine.length(); i++) {
+            char ch = pgn.charAt(i);
 
-                char ch = notationLine.charAt(i);
+            if (ch != ' ' && ch != '\n' && ch != '{' && ch != ';' && ch != '(') {
+                token.append(ch);
+            } else {
+                processMoveToken(token.toString().trim(), container, board, color);
+                token.delete(0, token.length());
 
-                if (ch != ' ' && ch != '{' && ch != ';' && ch != '(') {
-                    token.append(ch);
-                } else {
-                    processMoveToken(token.toString().trim(), container, board, color);
+                if (ch == ';') {
+                    int lineEndIndex = getLineEndIndex(pgn, i + 1);
+                    String commentToken = pgn.substring(i + 1, lineEndIndex).trim();
+                    processCommentToken(commentToken, container);
+                    i = lineEndIndex;
+                } else if (ch == '{') {
+                    int commentEndIndex = pgn.indexOf('}', i);
 
-                    if (ch == ';') {
-                        String commentToken = notationLine.substring(i + 1, notationLine.length()).trim();
+                    if (commentEndIndex != -1) {
+                        String commentToken = pgn.substring(i + 1, commentEndIndex);
                         processCommentToken(commentToken, container);
-                        i = notationLine.length();
-                    } else if (ch == '{') {
-                        int commentEndIndex = notationLine.indexOf('}', i);
+                        i = commentEndIndex + 1;
+                    } else {
+                        throw new PGNParseException("Error near character {");
+                    }
+                } else if (ch == '(') {
+                    int end = 1;
 
-                        if (commentEndIndex != -1) {
-                            String commentToken = notationLine.substring(i + 1, commentEndIndex);
-                            processCommentToken(commentToken, container);
-                            i = commentEndIndex + 1;
-                        } else {
-                            throw new PGNParseException("Error parsing line:\n" + notationLine + "\nNear character {");
-                        }
-                    } else if (ch == '(') {
-                        int end = 1;
+                    for (int k = i + 1; k < pgn.length(); k++) {
+                        char nextCh = pgn.charAt(k);
 
-                        for (int k = i + 1; k < notationLine.length(); k++) {
-                            char nextCh = notationLine.charAt(k);
-
-                            if (nextCh == '(') {
-                                end++;
-                            } else if (nextCh == ')' && --end == 0) {
-                                String variationPgn = notationLine.substring(i+1, k);
-                                PGNMove lastMove = container.getMove(container.getMovesCount() - 1);
-                                byte[][] variationBoard = cloneBoard(board);
-                                int[] varaitionColor = color.clone();
-                                handleBoardBackMove(lastMove, variationBoard, varaitionColor);
-                                parse(lastMove, variationPgn, color.clone(), variationBoard);
-                                i = k;
-                            }
+                        if (nextCh == '(') {
+                            end++;
+                        } else if (nextCh == ')' && --end == 0) {
+                            String variationPgn = pgn.substring(i+1, k);
+                            PGNMove lastMove = container.getMove(container.getMovesCount() - 1);
+                            byte[][] variationBoard = cloneBoard(board);
+                            int[] varaitionColor = color.clone();
+                            handleBoardBackMove(lastMove, variationBoard, varaitionColor);
+                            parse(lastMove, variationPgn, color.clone(), variationBoard);
+                            i = k;
                         }
                     }
-
-                    token.delete(0, token.length());
                 }
-            }
 
-            processMoveToken(token.toString().trim(), container, board, color);
+            }
         }
+
+        processMoveToken(token.toString().trim(), container, board, color);
     }
 
     private static void handleBoardBackMove(PGNMove move, byte[][] board, int[] color) {
