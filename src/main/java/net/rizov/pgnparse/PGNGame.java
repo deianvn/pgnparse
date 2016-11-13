@@ -17,21 +17,17 @@ package net.rizov.pgnparse;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
-public class PGNGame {
+public class PGNGame extends PGNMoveContainer {
 
 	private Map<String, String> tags;
-	
-	private List<PGNMove> moves;
 	
 	private String pgn;
 	
 	PGNGame() {
+		super();
 		tags = new HashMap<String, String>();
-		moves = new LinkedList<PGNMove>();
 	}
 	
 	PGNGame(String pgn) {
@@ -52,18 +48,6 @@ public class PGNGame {
 		tags.remove(key);
 	}
 	
-	void addMove(PGNMove move) {
-		moves.add(move);
-	}
-	
-	void removeMove(PGNMove move) {
-		moves.remove(move);
-	}
-	
-	void removeMove(int index) {
-		moves.remove(index);
-	}
-	
 	public String getTag(String key) {
 		return tags.get(key);
 	}
@@ -78,22 +62,6 @@ public class PGNGame {
 	
 	public int getTagsCount() {
 		return tags.size();
-	}
-	
-	public PGNMove getMove(int index) {
-		return moves.get(index);
-	}
-	
-	public Iterator<PGNMove> getMovesIterator() {
-		return moves.iterator();
-	}
-	
-	public int getMovesCount() {
-		return moves.size();
-	}
-	
-	public int getMovePairsCount() {
-		return moves.size() / 2;
 	}
 	
 }

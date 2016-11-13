@@ -19,23 +19,22 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
 public class PGNHelper {
 
-    public static String PAWN = "P";
+    private static final String PAWN = "P";
 
-    public static String KNIGHT = "N";
+    private static final String KNIGHT = "N";
 
-    public static String BISHOP = "B";
+    private static final String BISHOP = "B";
 
-    public static String ROOK = "R";
+    private static final String ROOK = "R";
 
-    public static String QUEEN = "Q";
+    private static final String QUEEN = "Q";
 
-    public static String KING = "K";
+    private static final String KING = "K";
 
     private static final byte WHITE = -1;
 
@@ -95,40 +94,14 @@ public class PGNHelper {
 
     private static final byte[][] QUEEN_KING_SEARCH_PATH = { {1, 1}, {1, -1}, {-1, -1}, {-1, 1}, {0, 1}, {1, 0}, {0, -1}, {-1, 0} };
 
-    /**
-     *
-     * @param pawn
-     * @param knight
-     * @param bishop
-     * @param rook
-     * @param queen
-     * @param king
-     */
-    public static void setPieces(String pawn, String knight, String bishop, String rook, String queen, String king) {
-        PAWN = pawn;
-        KNIGHT = knight;
-        BISHOP = bishop;
-        ROOK = rook;
-        QUEEN = queen;
-        KING = king;
-    }
-
-    /**
-     *
-     * @param pgn
-     * @return
-     * @throws IOException
-     * @throws PGNParseException
-     * @throws MalformedMoveException
-     * @throws NullPointerException
-     */
-    public static PGNGame parse(String pgnGame) throws IOException, PGNParseException, NullPointerException, MalformedMoveException {
-        byte[][] board = createDefaultBoard();
+    public static PGNGame parse(String pgnGame) throws IOException, PGNParseException, MalformedMoveException {
+        final PGNGame game = new PGNGame(pgnGame);
+        final byte[][] board = createDefaultBoard();
         final int[] color = { WHITE };
-        PGNGame game = new PGNGame(pgnGame);
+
         BufferedReader br = new BufferedReader(new StringReader(pgnGame));
         String line;
-        ArrayList<String> notationLines = new ArrayList<String>();
+        StringBuilder pgn = new StringBuilder();
 
         while ((line = br.readLine()) != null) {
             line = line.trim();
@@ -148,74 +121,148 @@ public class PGNHelper {
                 }
             } else {
                 if (!line.isEmpty()) {
-                    notationLines.add(line);
+                    pgn.append(line + "\n");
                 }
             }
         }
 
-        for (String notationLine : notationLines) {
-
-            String[] pairs = notationLine.split("\\s*\\d+\\.\\s*");
-
-            for (String pair : pairs) {
-                if (pair.isEmpty()) {
-                    continue;
-                }
-
-                String[] rawMoves;
-
-                if (pair.contains("{")) {
-                    int commentStart = pair.indexOf('{');
-                    String[] temp = pair.substring(0, commentStart).split("\\s+");
-                    temp = Arrays.copyOf(temp, temp.length + 1);
-                    temp[temp.length - 1] = pair.substring(commentStart);
-                    int i = 0;
-                    ArrayList<String> list = new ArrayList<String>();
-
-                    while (i < temp.length) {
-                        if (temp[i].startsWith("{")) {
-                            StringBuilder b = new StringBuilder();
-
-                            while (i < temp.length) {
-                                b.append(temp[i] + " ");
-
-                                if (temp[i++].endsWith("}")) {
-                                    break;
-                                }
-                            }
-
-                            //TODO check for inline comment and throw exception when i < temp.length and any more brackets are available
-
-                            list.add(b.toString().trim());
-                        } else {
-                            list.add(temp[i].trim());
-                        }
-
-                        i++;
-                    }
-
-                    rawMoves = list.toArray(new String[0]);
-                } else {
-                    rawMoves = pair.split("\\s+");
-                }
-
-                try {
-                    handleRawMoves(rawMoves, game, board, color);
-                } catch (PGNParseException e) {
-                    throw new PGNParseException(game.toString(), e);
-                }
-            }
-        }
-
+        parse(game, pgn.toString(), color, board);
         return game;
     }
 
-    /**
-     *
-     * @param pgn
-     * @return
-     * @throws IOException
-     */
+    private static void parse(PGNMoveContainer container, String pgn, int[] color, byte[][] board) throws IOException, PGNParseException, MalformedMoveException {
+
+        StringBuilder token = new StringBuilder();
+        BufferedReader br = new BufferedReader(new StringReader(pgn));
+        String notationLine;
+
+        while ((notationLine = br.readLine()) != null) {
+            token.delete(0, token.length());
+
+            for (int i = 0; i < notationLine.length(); i++) {
+
+                char ch = notationLine.charAt(i);
+
+                if (ch != ' ' && ch != '{' && ch != ';' && ch != '(') {
+                    token.append(ch);
+                } else {
+                    processMoveToken(token.toString().trim(), container, board, color);
+
+                    if (ch == ';') {
+                        String commentToken = notationLine.substring(i + 1, notationLine.length()).trim();
+                        processCommentToken(commentToken, container);
+                        i = notationLine.length();
+                    } else if (ch == '{') {
+                        int commentEndIndex = notationLine.indexOf('}', i);
+
+                        if (commentEndIndex != -1) {
+                            String commentToken = notationLine.substring(i + 1, commentEndIndex);
+                            processCommentToken(commentToken, container);
+                            i = commentEndIndex + 1;
+                        } else {
+                            throw new PGNParseException("Error parsing line:\n" + notationLine + "\nNear character {");
+                        }
+                    } else if (ch == '(') {
+                        int end = 1;
+
+                        for (int k = i + 1; k < notationLine.length(); k++) {
+                            char nextCh = notationLine.charAt(k);
+
+                            if (nextCh == '(') {
+                                end++;
+                            } else if (nextCh == ')' && --end == 0) {
+                                String variationPgn = notationLine.substring(i+1, k);
+                                PGNMove lastMove = container.getMove(container.getMovesCount() - 1);
+                                byte[][] variationBoard = cloneBoard(board);
+                                int[] varaitionColor = color.clone();
+                                handleBoardBackMove(lastMove, variationBoard, varaitionColor);
+                                parse(lastMove, variationPgn, color.clone(), variationBoard);
+                                i = k;
+                            }
+                        }
+                    }
+
+                    token.delete(0, token.length());
+                }
+            }
+
+            processMoveToken(token.toString().trim(), container, board, color);
+        }
+    }
+
+    private static void handleBoardBackMove(PGNMove move, byte[][] board, int[] color) {
+
+        if (move.isCastle()) {
+            if (move.isKingSideCastle()) {
+
+                if (move.getColor() == Color.white) {
+                    board[4][0] = board[6][0];
+                    board[7][0] = board[5][0];
+                    board[6][0] = EMPTY;
+                    board[5][0] = EMPTY;
+                } else {
+                    board[4][7] = board[6][7];
+                    board[7][7] = board[5][7];
+                    board[6][7] = EMPTY;
+                    board[5][7] = EMPTY;
+                }
+            } else {
+
+                if (move.getColor() == Color.white) {
+                    board[4][0] = board[2][0];
+                    board[0][0] = board[3][0];
+                    board[2][0] = EMPTY;
+                    board[3][0] = EMPTY;
+                } else {
+                    board[4][7] = board[2][7];
+                    board[0][7] = board[3][7];
+                    board[2][7] = EMPTY;
+                    board[3][7] = EMPTY;
+                }
+
+            }
+
+        } else {
+            String from = move.getFromSquare();
+            String to = move.getToSquare();
+
+            if (move.isPromoted()) {
+                board[getChessATOI(from.charAt(0))][from.charAt(1) - '1'] = (byte)(BLACK_PAWN * color[0]);
+            } else {
+                board[getChessATOI(from.charAt(0))][from.charAt(1) - '1'] = board[getChessATOI(to.charAt(0))][to.charAt(1) - '1'];
+            }
+
+            if (move.isCaptured()) {
+                byte piece = pieceToByte(move.getCapturedPiece(), color[0] * -1);
+
+                if (move.isEnpassant()) {
+                    String ep = move.getEnpassantPieceSquare();
+                    board[getChessATOI(ep.charAt(0))][ep.charAt(1) - '1'] = piece;
+                } else {
+                    board[getChessATOI(to.charAt(0))][to.charAt(1) - '1'] = piece;
+                }
+            } else {
+                board[getChessATOI(to.charAt(0))][to.charAt(1) - '1'] = EMPTY;
+            }
+        }
+    }
+
+    private static void processMoveToken(String token, PGNMoveContainer container, byte[][] board, int[] color) throws MalformedMoveException, PGNParseException {
+        token = token.replaceAll("\\s*\\d+\\.+\\s*", "");
+
+        if (token.length() > 0) {
+            handleToken(token, container, board, color);
+        }
+    }
+
+    private static void processCommentToken(String token, PGNMoveContainer container) throws MalformedMoveException {
+        if (container.getMovesCount() > 0) {
+            container.getMove(container.getMovesCount() - 1).setComment(token);
+        } else {
+            throw new MalformedMoveException(token);
+        }
+    }
+
     public static List<String> splitPGN(String pgn) throws IOException {
         List<String> pgnGames = new LinkedList<String>();
         BufferedReader br = new BufferedReader(new StringReader(pgn));
@@ -241,30 +288,26 @@ public class PGNHelper {
         return pgnGames;
     }
 
-    /**
-     *
-     * @throws MalformedMoveException
-     */
     static PGNMove parseMove(String move) throws MalformedMoveException {
 
         PGNMove pgnMove = new PGNMove();
         pgnMove.setFullMove(move);
         String piece;
 
-        if (move.startsWith(PGNParser.PAWN)) {
-            piece = PGNParser.PAWN;
-        } else if (move.startsWith(PGNParser.KNIGHT)) {
-            piece = PGNParser.KNIGHT;
-        } else if (move.startsWith(PGNParser.BISHOP)) {
-            piece = PGNParser.BISHOP;
-        } else if (move.startsWith(PGNParser.ROOK)) {
-            piece = PGNParser.ROOK;
-        } else if (move.startsWith(PGNParser.QUEEN)) {
-            piece = PGNParser.QUEEN;
-        } else if (move.startsWith(PGNParser.KING)) {
-            piece = PGNParser.KING;
+        if (move.startsWith(PAWN)) {
+            piece = PAWN;
+        } else if (move.startsWith(KNIGHT)) {
+            piece = KNIGHT;
+        } else if (move.startsWith(BISHOP)) {
+            piece = BISHOP;
+        } else if (move.startsWith(ROOK)) {
+            piece = ROOK;
+        } else if (move.startsWith(QUEEN)) {
+            piece = QUEEN;
+        } else if (move.startsWith(KING)) {
+            piece = KING;
         } else {
-            piece = PGNParser.PAWN;
+            piece = PAWN;
         }
 
         pgnMove.setPiece(piece);
@@ -288,12 +331,12 @@ public class PGNHelper {
             try {
                 String promotedPiece = move.substring(move.indexOf('=') + 1);
 
-                if (promotedPiece.equals(PGNParser.PAWN)
-                        || promotedPiece.equals(PGNParser.KNIGHT)
-                        || promotedPiece.equals(PGNParser.BISHOP)
-                        || promotedPiece.equals(PGNParser.ROOK)
-                        || promotedPiece.equals(PGNParser.QUEEN)
-                        || promotedPiece.equals(PGNParser.KING))
+                if (promotedPiece.equals(PAWN)
+                        || promotedPiece.equals(KNIGHT)
+                        || promotedPiece.equals(BISHOP)
+                        || promotedPiece.equals(ROOK)
+                        || promotedPiece.equals(QUEEN)
+                        || promotedPiece.equals(KING))
                 {
                     move = move.substring(0, move.indexOf('='));
                     pgnMove.setPromoted(true);
@@ -322,24 +365,49 @@ public class PGNHelper {
         return pgnMove;
     }
 
-    /**
-     *
-     * @param rawMoves
-     * @param game
-     * @param board
-     * @throws MalformedMoveException
-     * @throws PGNParseException
-     */
-    private static void handleRawMoves(String[] rawMoves, PGNGame game, byte[][] board, int[] color) throws MalformedMoveException, PGNParseException, NullPointerException {
+    private static void handleToken(String token, PGNMoveContainer container, byte[][] board, int[] color) throws MalformedMoveException, PGNParseException, NullPointerException {
+
         PGNMove move = null;
 
-        for (int i = 0; i < rawMoves.length; i++) {
-            if (rawMoves[i].equals("e.p.")) {
-                continue;
-            } else if (rawMoves[i].startsWith("{") && rawMoves[i].endsWith("}")) {
-                move.setComment(rawMoves[i].substring(1, rawMoves[i].length() - 1));
+        if (container.getMovesCount() > 0) {
+            move = container.getMove(container.getMovesCount() - 1);
+        }
+
+        if (token.equals("e.p.")) {
+            return;
+        } else if (token.startsWith("{") && token.endsWith("}")) {
+            move.setComment(token.substring(1, token.length() - 1));
+        } else {
+            move = parseMove(token);
+
+            if (validateMove(move)) {
+
+                if (color[0] == WHITE) {
+                    move.setColor(Color.white);
+                } else {
+                    move.setColor(Color.black);
+                }
+
+                container.addMove(move);
+                updateNextMove(move, board);
+                switchColor(color);
             } else {
-                move = parseMove(rawMoves[i]);
+                throw new PGNParseException(move.getFullMove());
+            }
+        }
+    }
+
+    private static void handleTokens(String[] tokens, PGNMoveContainer container, byte[][] board, int[] color) throws MalformedMoveException, PGNParseException, NullPointerException {
+        PGNMove move = null;
+
+        for (int i = 0; i < tokens.length; i++) {
+
+            if (tokens[i].equals("e.p.")) {
+                continue;
+            } else if (tokens[i].startsWith("{") && tokens[i].endsWith("}")) {
+                move.setComment(tokens[i].substring(1, tokens[i].length() - 1));
+            } else {
+                move = parseMove(tokens[i]);
 
                 if (validateMove(move)) {
 
@@ -349,7 +417,7 @@ public class PGNHelper {
                         move.setColor(Color.black);
                     }
 
-                    game.addMove(move);
+                    container.addMove(move);
                     updateNextMove(move, board);
                     switchColor(color);
                 } else {
@@ -359,12 +427,6 @@ public class PGNHelper {
         }
     }
 
-    /**
-     *
-     * @param move
-     * @param board
-     * @throws PGNParseException
-     */
     private static void updateNextMove(PGNMove move, byte[][] board) throws PGNParseException {
         String strippedMove = move.getMove();
         byte color;
@@ -377,7 +439,6 @@ public class PGNHelper {
 
         if (move.isCastle()) {
             if (move.isKingSideCastle()) {
-                move.setKingSideCastle(true);
 
                 if (move.getColor() == Color.white) {
                     board[6][0] = board[4][0];
@@ -391,7 +452,6 @@ public class PGNHelper {
                     board[7][7] = EMPTY;
                 }
             } else {
-                move.setQueenSideCastle(true);
 
                 if (move.getColor() == Color.white) {
                     board[2][0] = board[4][0];
@@ -438,21 +498,46 @@ public class PGNHelper {
             }
 
             try {
+                byte capturedPiece = board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'];
                 board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'] = board[getChessATOI(move.getFromSquare().charAt(0))][move.getFromSquare().charAt(1) - '1'];
                 board[getChessATOI(move.getFromSquare().charAt(0))][move.getFromSquare().charAt(1) - '1'] = EMPTY;
 
                 if (move.isEnpassantCapture()) {
+                    capturedPiece = board[getChessATOI(move.getEnpassantPieceSquare().charAt(0))][move.getEnpassantPieceSquare().charAt(1) - '1'];
                     board[getChessATOI(move.getEnpassantPieceSquare().charAt(0))][move.getEnpassantPieceSquare().charAt(1) - '1'] = EMPTY;
                 }
 
+                if (capturedPiece != EMPTY) {
+                    switch (Math.abs(capturedPiece)) {
+                        case BLACK_PAWN :
+                            move.setCapturedPiece(PAWN);
+                            break;
+                        case BLACK_ROOK :
+                            move.setCapturedPiece(ROOK);
+                            break;
+                        case BLACK_KNIGHT :
+                            move.setCapturedPiece(KNIGHT);
+                            break;
+                        case BLACK_BISHOP :
+                            move.setCapturedPiece(BISHOP);
+                            break;
+                        case BLACK_QUEEN :
+                            move.setCapturedPiece(QUEEN);
+                            break;
+                        case BLACK_KING :
+                            move.setCapturedPiece(KING);
+                            break;
+                    }
+                }
+
                 if (move.isPromoted()) {
-                    if (move.getPromotion().equals(PGNParser.QUEEN)) {
+                    if (move.getPromotion().equals(QUEEN)) {
                         board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'] = (byte)(BLACK_QUEEN * color);
-                    } else if (move.getPromotion().equals(PGNParser.ROOK)) {
+                    } else if (move.getPromotion().equals(ROOK)) {
                         board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'] = (byte)(BLACK_ROOK * color);
-                    } else if (move.getPromotion().equals(PGNParser.BISHOP)) {
+                    } else if (move.getPromotion().equals(BISHOP)) {
                         board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'] = (byte)(BLACK_BISHOP * color);
-                    } else if (move.getPromotion().equals(PGNParser.KNIGHT)) {
+                    } else if (move.getPromotion().equals(KNIGHT)) {
                         board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'] = (byte)(BLACK_KNIGHT * color);
                     }
                 }
@@ -464,14 +549,6 @@ public class PGNHelper {
 
     }
 
-    /**
-     *
-     * @param move
-     * @param strippedMove
-     * @param color
-     * @param board
-     * @throws PGNParseException
-     */
     private static void handleMoveType1(PGNMove move, String strippedMove, byte color, byte[][] board) throws PGNParseException {
         int tohPos = getChessATOI(strippedMove.charAt(0));
         int tovPos = strippedMove.charAt(1) - '1';
@@ -487,14 +564,6 @@ public class PGNHelper {
         move.setToSquare(getChessCoords(tohPos, tovPos));
     }
 
-    /**
-     *
-     * @param move
-     * @param strippedMove
-     * @param color
-     * @param board
-     * @throws PGNParseException
-     */
     private static void handleMoveType2(PGNMove move, String strippedMove, byte color, byte[][] board) throws PGNParseException {
         byte piece;
         int tohPos = getChessATOI(strippedMove.charAt(1));
@@ -566,14 +635,6 @@ public class PGNHelper {
         move.setToSquare(getChessCoords(tohPos, tovPos));
     }
 
-    /**
-     *
-     * @param move
-     * @param strippedMove
-     * @param color
-     * @param board
-     * @throws PGNParseException
-     */
     private static void handleMoveType3(PGNMove move, String strippedMove, byte color, byte[][] board) throws PGNParseException {
         byte piece = WHITE_PAWN;
         int fromhPos = getChessATOI(strippedMove.charAt(1));
@@ -609,14 +670,6 @@ public class PGNHelper {
         move.setToSquare(getChessCoords(tohPos, tovPos));
     }
 
-    /**
-     *
-     * @param move
-     * @param strippedMove
-     * @param color
-     * @param board
-     * @throws PGNParseException
-     */
     private static void handleMoveType4(PGNMove move, String strippedMove, byte color, byte[][] board) throws PGNParseException {
         byte piece = WHITE_PAWN;
         int fromhPos = getChessATOI(strippedMove.charAt(1));
@@ -650,14 +703,6 @@ public class PGNHelper {
         move.setToSquare(getChessCoords(tohPos, tovPos));
     }
 
-    /**
-     *
-     * @param move
-     * @param strippedMove
-     * @param color
-     * @param board
-     * @throws PGNParseException
-     */
     private static void handleMoveType5(PGNMove move, String strippedMove, byte color, byte[][] board) throws PGNParseException {
         int fromhPos = getChessATOI(strippedMove.charAt(0));
         int tohPos = getChessATOI(strippedMove.charAt(1));
@@ -686,14 +731,6 @@ public class PGNHelper {
         move.setToSquare(getChessCoords(tohPos, tovPos));
     }
 
-    /**
-     *
-     * @param move
-     * @param strippedMove
-     * @param color
-     * @param board
-     * @throws PGNParseException
-     */
     private static void handleMoveType6(PGNMove move, String strippedMove, byte color, byte[][] board) throws PGNParseException {
         byte piece = WHITE_PAWN;
         int fromvPos = strippedMove.charAt(1) - '1';
@@ -721,7 +758,6 @@ public class PGNHelper {
         }
 
         if (fromvPos == -1 || fromhPos == -1) {
-//			printBoard(board);
             throw new PGNParseException(move.getFullMove());
         }
 
@@ -729,11 +765,6 @@ public class PGNHelper {
         move.setToSquare(getChessCoords(tohPos, tovPos));
     }
 
-    /**
-     *
-     * @param color
-     * @return
-     */
     private static void switchColor(int[] color) {
         if (color[0] < 0) {
             color[0] = BLACK;
@@ -742,33 +773,14 @@ public class PGNHelper {
         }
     }
 
-    /**
-     *
-     * @param alfa
-     * @return
-     */
     private static int getChessATOI(char alfa) {
         return alfa - 'a';
     }
 
-    /**
-     *
-     * @param hPos
-     * @param vPos
-     * @return
-     */
     private static String getChessCoords(int hPos, int vPos) {
         return (char)('a' + hPos) + "" + (vPos + 1);
     }
 
-    /**
-     *
-     * @param hPos
-     * @param vPos
-     * @param piece
-     * @param board
-     * @return
-     */
     private static int getPawnvPos(int hPos, int vPos, byte piece, byte[][] board) {
         if (board[hPos][vPos + piece] == piece) {
             return vPos + piece;
@@ -779,15 +791,6 @@ public class PGNHelper {
         return -1;
     }
 
-    /**
-     *
-     * @param hPos
-     * @param vPos
-     * @param piece
-     * @param board
-     * @param moveData
-     * @return
-     */
     private static int[] getSingleMovePiecePos(int hPos, int vPos, byte piece, byte[][] board, byte[][] moveData) {
         for (int i = 0; i < moveData.length; i++) {
             try {
@@ -806,16 +809,6 @@ public class PGNHelper {
         return null;
     }
 
-    /**
-     *
-     * @param hPos
-     * @param vPos
-     * @param fromhPos
-     * @param piece
-     * @param board
-     * @param moveData
-     * @return
-     */
     private static int getSingleMovePiecevPos(int hPos, int vPos, int fromhPos, byte piece, byte[][] board, byte[][] moveData) {
         for (int i = 0; i < moveData.length; i++) {
             try {
@@ -834,16 +827,6 @@ public class PGNHelper {
         return -1;
     }
 
-    /**
-     *
-     * @param hPos
-     * @param vPos
-     * @param fromvPos
-     * @param piece
-     * @param board
-     * @param moveData
-     * @return
-     */
     private static int getSingleMovePiecehPos(int hPos, int vPos, int fromvPos, byte piece, byte[][] board, byte[][] moveData) {
         for (int i = 0; i < moveData.length; i++) {
             try {
@@ -862,15 +845,6 @@ public class PGNHelper {
         return -1;
     }
 
-    /**
-     *
-     * @param hPos
-     * @param vPos
-     * @param piece
-     * @param board
-     * @param moveData
-     * @return
-     */
     private static int[] getMultiMovePiecePos(int hPos, int vPos, byte piece, byte[][] board, byte[][] moveData) {
         for (int i = 0; i < moveData.length; i++) {
             int[] position = getMultiMovePiecePosRec(hPos, vPos, hPos, vPos, moveData[i][0], moveData[i][1], piece, board);
@@ -883,16 +857,6 @@ public class PGNHelper {
         return null;
     }
 
-    /**
-     *
-     * @param hPos
-     * @param vPos
-     * @param hAdd
-     * @param vAdd
-     * @param piece
-     * @param board
-     * @return
-     */
     private static int[] getMultiMovePiecePosRec(int originalhPos, int originalvPos, int hPos, int vPos, int hAdd, int vAdd, byte piece, byte[][] board) {
         hPos += hAdd;
         vPos += vAdd;
@@ -916,16 +880,6 @@ public class PGNHelper {
         return getMultiMovePiecePosRec(originalhPos, originalvPos, hPos, vPos, hAdd, vAdd, piece, board);
     }
 
-    /**
-     *
-     * @param hPos
-     * @param vPos
-     * @param fromhPos
-     * @param piece
-     * @param board
-     * @param moveData
-     * @return
-     */
     private static int getMultiMovePiecevPos(int hPos, int vPos, int fromhPos, byte piece, byte[][] board, byte[][] moveData) {
         for (int i = 0; i < moveData.length; i++) {
             int fromvPos = getMultiMovePiecevPosRec(hPos, vPos, hPos, vPos, moveData[i][0], moveData[i][1], fromhPos, piece, board);
@@ -938,17 +892,6 @@ public class PGNHelper {
         return -1;
     }
 
-    /**
-     *
-     * @param hPos
-     * @param vPos
-     * @param hAdd
-     * @param vAdd
-     * @param fromhPos
-     * @param piece
-     * @param board
-     * @return
-     */
     private static int getMultiMovePiecevPosRec(int originalhPos, int originalvPos, int hPos, int vPos, int hAdd, int vAdd, int fromhPos, byte piece, byte[][] board) {
         hPos += hAdd;
         vPos += vAdd;
@@ -972,16 +915,6 @@ public class PGNHelper {
         return getMultiMovePiecevPosRec(originalhPos, originalvPos, hPos, vPos, hAdd, vAdd, fromhPos, piece, board);
     }
 
-    /**
-     *
-     * @param hPos
-     * @param vPos
-     * @param fromvPos
-     * @param piece
-     * @param board
-     * @param moveData
-     * @return
-     */
     private static int getMultiMovePiecehPos(int hPos, int vPos, int fromvPos, byte piece, byte[][] board, byte[][] moveData) {
         for (int i = 0; i < moveData.length; i++) {
             int fromhPos = getMultiMovePiecehPosRec(hPos, vPos, hPos, vPos, moveData[i][0], moveData[i][1], fromvPos, piece, board);
@@ -994,17 +927,6 @@ public class PGNHelper {
         return -1;
     }
 
-    /**
-     *
-     * @param hPos
-     * @param vPos
-     * @param hAdd
-     * @param vAdd
-     * @param fromvPos
-     * @param piece
-     * @param board
-     * @return
-     */
     private static int getMultiMovePiecehPosRec(int originalhPos, int originalvPos, int hPos, int vPos, int hAdd, int vAdd, int fromvPos, byte piece, byte[][] board) {
         hPos += hAdd;
         vPos += vAdd;
@@ -1028,11 +950,6 @@ public class PGNHelper {
         return getMultiMovePiecehPosRec(originalhPos, originalvPos, hPos, vPos, hAdd, vAdd, fromvPos, piece, board);
     }
 
-    /**
-     *
-     * @param move
-     * @return
-     */
     private static boolean validateMove(PGNMove move) {
         String strippedMove = move.getMove();
 
@@ -1122,10 +1039,6 @@ public class PGNHelper {
         return board[hPos][vPos] == piece;
     }
 
-    /**
-     *
-     * @return
-     */
     private static byte[][] createDefaultBoard() {
         return new byte[][] {
                 { WHITE_ROOK, WHITE_PAWN, EMPTY, EMPTY, EMPTY, EMPTY, BLACK_PAWN, BLACK_ROOK, },
@@ -1141,6 +1054,37 @@ public class PGNHelper {
 
     private static byte[][] createBoard(String fen) {
         return null;
+    }
+
+    private static byte[][] cloneBoard(byte[][] board) {
+        byte[][] newBoard = new byte[board.length][];
+
+        for(int i = 0; i < board.length; i++) {
+            newBoard[i] = board[i].clone();
+        }
+
+        return newBoard;
+    }
+
+    private static byte pieceToByte(String piece, int color) {
+
+        int p = EMPTY;
+
+        if (piece.equals(PAWN)) {
+            p = BLACK_PAWN * color;
+        } else if (piece.equals(ROOK)) {
+            p = BLACK_ROOK * color;
+        } else if (piece.equals(KNIGHT)) {
+            p = BLACK_KNIGHT * color;
+        } else if (piece.equals(BISHOP)) {
+            p = BLACK_BISHOP * color;
+        } else if (piece.equals(QUEEN)) {
+            p = BLACK_QUEEN * color;
+        } else if (piece.equals(KING)) {
+            p = BLACK_KING * color;
+        }
+
+        return (byte)p;
     }
 
 }

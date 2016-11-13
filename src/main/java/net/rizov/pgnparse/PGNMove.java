@@ -15,7 +15,7 @@
  */
 package net.rizov.pgnparse;
 
-public class PGNMove {
+public class PGNMove extends PGNMoveContainer {
 
 	private String move;
 
@@ -28,6 +28,8 @@ public class PGNMove {
 	private String piece;
 	
 	private Color color;
+
+    private String capturedPiece;
 	
 	private String comment = "";
 
@@ -101,6 +103,14 @@ public class PGNMove {
 
     void setColor(Color color) {
         this.color = color;
+    }
+
+    public String getCapturedPiece() {
+        return capturedPiece;
+    }
+
+    public void setCapturedPiece(String capturedPiece) {
+        this.capturedPiece = capturedPiece;
     }
 
     public String getComment() {
@@ -209,5 +219,9 @@ public class PGNMove {
 
     public boolean isCastle() {
         return isKingSideCastle() || isQueenSideCastle();
+    }
+
+    public boolean hasVariations() {
+        return getMovesCount() > 0;
     }
 }
