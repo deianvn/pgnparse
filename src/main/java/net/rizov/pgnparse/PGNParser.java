@@ -18,8 +18,13 @@ package net.rizov.pgnparse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
+@Deprecated
 public class PGNParser {
 	
 	public static String PAWN = "P";
@@ -135,7 +140,17 @@ public class PGNParser {
 		
 		return games;
 	}
-	
+
+    /**
+     *
+     * @param pgn
+     * @param force
+     * @return
+     * @throws PGNParseException
+     * @throws IOException
+     * @throws NullPointerException
+     * @throws MalformedMoveException
+     */
 	public static List<PGNGame> parse(String pgn, boolean force) throws PGNParseException, IOException, NullPointerException, MalformedMoveException {
 		List<PGNGame> games = new LinkedList<PGNGame>();
 		List<String> pgnSources = PGNParser.splitPGN(pgn);
@@ -161,6 +176,37 @@ public class PGNParser {
 		
 		return games;
 	}
+
+    /**
+     *
+     * @param pgn
+     * @return
+     * @throws IOException
+     */
+    public static List<String> splitPGN(String pgn) throws IOException {
+        List<String> pgnGames = new LinkedList<String>();
+        BufferedReader br = new BufferedReader(new StringReader(pgn));
+        String line;
+        StringBuilder buffer = new StringBuilder();
+
+        while ((line = br.readLine()) != null) {
+            line = line.trim();
+
+            if (!line.isEmpty()) {
+                buffer.append(line + "\n");
+
+                if (line.endsWith("1-0") || line.endsWith("0-1") || line.endsWith("1/2-1/2") || line.endsWith("*")) {
+                    pgnGames.add(buffer.toString());
+                    buffer.delete(0, buffer.length());
+                }
+            }
+
+        }
+
+        br.close();
+
+        return pgnGames;
+    }
 	
 	/**
 	 * 
@@ -213,7 +259,6 @@ public class PGNParser {
 			
 			if (pair.contains("{")) {
 				int commentStart = pair.indexOf('{');
-				//String[] temp = new String[] { pair.substring(0, commentStart), pair.substring(commentStart) };
 				String[] temp = pair.substring(0, commentStart).split("\\s+");
                 temp = Arrays.copyOf(temp, temp.length + 1);
                 temp[temp.length - 1] = pair.substring(commentStart);
@@ -274,7 +319,7 @@ public class PGNParser {
 			} else if (rawMoves[i].startsWith("{") && rawMoves[i].endsWith("}")) {
 				move.setComment(rawMoves[i].substring(1, rawMoves[i].length() - 1));
 			} else {
-				if (validateMove(move = new PGNMove(rawMoves[i]))) {
+				if (validateMove(move = PGNHelper.parseMove(rawMoves[i]))) {
 					
 					if (color[0] == WHITE) {
 						move.setColor(Color.white);
@@ -290,37 +335,6 @@ public class PGNParser {
 				}
 			}
 		}
-	}
-	
-	/**
-	 * 
-	 * @param pgn
-	 * @return
-	 * @throws IOException
-	 */
-	private static List<String> splitPGN(String pgn) throws IOException {
-		List<String> pgnGames = new LinkedList<String>();
-		BufferedReader br = new BufferedReader(new StringReader(pgn));
-		String line;
-		StringBuilder buffer = new StringBuilder();
-		
-		while ((line = br.readLine()) != null) {
-			line = line.trim();
-			
-			if (!line.isEmpty()) {
-				buffer.append(line + "\n");
-				
-				if (line.endsWith("1-0") || line.endsWith("0-1") || line.endsWith("1/2-1/2") || line.endsWith("*")) {
-					pgnGames.add(buffer.toString());
-					buffer.delete(0, buffer.length());
-				}
-			}
-			
-		}
-		
-		br.close();
-		
-		return pgnGames;
 	}
 	
 	/**

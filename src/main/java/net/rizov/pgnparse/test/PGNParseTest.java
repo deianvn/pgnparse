@@ -91,7 +91,7 @@ public class PGNParseTest {
 					System.out.print("[" + move.getFromSquare() + "]->[" + move.getToSquare() + "] ");
 				}
 
-				if (!move.getComment().isEmpty()) {
+				if (move.getComment().length() > 0) {
 					System.out.print("/* " + move.getComment() + " */ ");
 				}
 			}

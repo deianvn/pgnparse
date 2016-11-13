@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PGNSource {
@@ -62,12 +63,34 @@ public class PGNSource {
 		return source;
 	}
 	
-	public List<PGNGame> listGames() throws PGNParseException, IOException, NullPointerException, MalformedMoveException {
-		return PGNParser.parse(source);
+	public List<PGNGame> listGames() throws IOException, PGNParseException, MalformedMoveException {
+		List<String> pgns = PGNHelper.splitPGN(source);
+		ArrayList<PGNGame> games = new ArrayList<PGNGame>();
+
+		for (String pgn : pgns) {
+			games.add(PGNHelper.parse(pgn));
+		}
+
+		return games;
 	}
 	
-	public List<PGNGame> listGames(boolean force) throws PGNParseException, IOException, NullPointerException, MalformedMoveException {
-		return PGNParser.parse(source, force);
+	public List<PGNGame> listGames(boolean force) throws IOException, PGNParseException, MalformedMoveException {
+
+		if (!force) {
+			return listGames();
+		}
+
+		List<String> pgns = PGNHelper.splitPGN(source);
+		ArrayList<PGNGame> games = new ArrayList<PGNGame>();
+
+		for (String pgn : pgns) {
+			try {
+				games.add(PGNHelper.parse(pgn));
+			} catch (PGNParseException e) {
+			} catch (MalformedMoveException e) {}
+		}
+
+		return games;
 	}
 	
 }
