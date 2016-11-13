@@ -18,7 +18,6 @@ package net.rizov.pgnparse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -183,8 +182,10 @@ public class PGNHelper {
                             byte[][] variationBoard = cloneBoard(board);
                             int[] varaitionColor = color.clone();
                             handleBoardBackMove(lastMove, variationBoard, varaitionColor);
-                            parse(lastMove, variationPgn, color.clone(), variationBoard);
+                            switchColor(varaitionColor);
+                            parse(lastMove, variationPgn, varaitionColor, variationBoard);
                             i = k;
+                            break;
                         }
                     }
                 }
@@ -433,6 +434,7 @@ public class PGNHelper {
     }
 
     private static void updateNextMove(PGNMove move, byte[][] board) throws PGNParseException {
+
         String strippedMove = move.getMove();
         byte color;
 
@@ -1090,6 +1092,16 @@ public class PGNHelper {
         }
 
         return (byte)p;
+    }
+
+    private static void printBoard(byte[][] board) {
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[i].length; j++) {
+                System.out.print(board[j][i] + "\t");
+            }
+            System.out.println();
+        }
+        System.out.println();
     }
 
 }

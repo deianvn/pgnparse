@@ -94,10 +94,28 @@ public class PGNParseTest {
 				if (move.getComment().length() > 0) {
 					System.out.print("/* " + move.getComment() + " */ ");
 				}
+
+				printVariation(move);
 			}
 			
 			System.out.println();
 		}
 	}
+
+	private static void printVariation(PGNMove variation) {
+
+        if (variation.hasVariations()) {
+            System.out.print(" ( ");
+            Iterator<PGNMove> vi = variation.getMovesIterator();
+
+            while (vi.hasNext()) {
+                PGNMove move = vi.next();
+                System.out.print(move.getMove() + " ");
+                printVariation(move);
+            }
+            System.out.print(" ) ");
+        }
+
+    }
 
 }
