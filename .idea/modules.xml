@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/pgnparse.iml" filepath="$PROJECT_DIR$/.idea/modules/pgnparse.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/pgnparse_examples.iml" filepath="$PROJECT_DIR$/.idea/modules/pgnparse_examples.iml" group="pgnparse" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/pgnparse_main.iml" filepath="$PROJECT_DIR$/.idea/modules/pgnparse_main.iml" group="pgnparse" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/pgnparse_test.iml" filepath="$PROJECT_DIR$/.idea/modules/pgnparse_test.iml" group="pgnparse" />
     </modules>

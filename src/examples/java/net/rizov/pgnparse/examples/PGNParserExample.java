@@ -14,28 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with PGNParse.  If not, see <http://www.gnu.org/licenses/>. 
  */
-package net.rizov.pgnparse.test;
+package net.rizov.pgnparse.examples;
+
+import net.rizov.pgnparse.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import net.rizov.pgnparse.*;
 
 /**
  *
  * @author Deyan Rizov
  *
  */
-public class PGNParseTest {
+public class PGNParserExample {
 
-	/**
-	 * @param args
-	 * @throws IOException 
-	 * @throws PGNParseException 
-	 * @throws MalformedMoveException 
-	 * @throws NullPointerException 
-	 */
 	public static void main(String[] args) throws IOException, PGNParseException, NullPointerException, MalformedMoveException {
 		if (args.length == 0) {
 			System.out.println("Usage:");
