@@ -1,5 +1,4 @@
-# pgnparse
-pgnparse - Portable Game Notation (PGN) parsing library
+Portable Game Notation (PGN) parsing library
 =======================================================
 Introduction
 ------------
