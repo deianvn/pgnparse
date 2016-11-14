@@ -20,11 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import net.rizov.pgnparse.MalformedMoveException;
-import net.rizov.pgnparse.PGNGame;
-import net.rizov.pgnparse.PGNMove;
-import net.rizov.pgnparse.PGNParseException;
-import net.rizov.pgnparse.PGNSource;
+import net.rizov.pgnparse.*;
 
 /**
  *
@@ -69,51 +65,52 @@ public class PGNParseTest {
 			}
 			
 			System.out.println();
-			Iterator<PGNMove> movesIterator = game.getMovesIterator();
-			int num = 1;
-			
-			while (movesIterator.hasNext()) {
-				PGNMove move = movesIterator.next();
-				
-				if (num % 2 == 1 && !move.isEndGameMarked()) {
-					System.out.print((num + 1) / 2 + ". ");
-				}
-				
-				num++;
-				
-				if (move.isEndGameMarked()) {
-					System.out.print("(" + move.getMove() + ")");
-				} else if (move.isKingSideCastle()) {
-					System.out.print("[O-O] ");
-				} else if (move.isQueenSideCastle()) {
-					System.out.print("[O-O-O] ");
-				} else {
-					System.out.print("[" + move.getFromSquare() + "]->[" + move.getToSquare() + "] ");
-				}
-
-				if (move.getComment().length() > 0) {
-					System.out.print("/* " + move.getComment() + " */ ");
-				}
-
-				printVariation(move);
-			}
-			
+			printMoves(game, 1);
 			System.out.println();
 		}
 	}
 
-	private static void printVariation(PGNMove variation) {
+	private static void printMoves(PGNMoveContainer container, int startMove) {
+		Iterator<PGNMove> movesIterator = container.getMovesIterator();
+		int num = startMove;
 
-        if (variation.hasVariations()) {
-            System.out.print(" ( ");
-            Iterator<PGNMove> vi = variation.getMovesIterator();
+		while (movesIterator.hasNext()) {
+			PGNMove move = movesIterator.next();
 
-            while (vi.hasNext()) {
-                PGNMove move = vi.next();
-                System.out.print(move.getMove() + " ");
-                printVariation(move);
-            }
-            System.out.print(" ) ");
+			if (num % 2 == 1 && !move.isEndGameMarked()) {
+				System.out.print((num + 1) / 2 + ". ");
+			}
+
+			num++;
+
+			if (move.isEndGameMarked()) {
+				System.out.print("(" + move.getMove() + ")");
+			} else if (move.isKingSideCastle()) {
+				System.out.print("[O-O] ");
+			} else if (move.isQueenSideCastle()) {
+				System.out.print("[O-O-O] ");
+			} else {
+				System.out.print("[" + move.getFromSquare() + "]->[" + move.getToSquare() + "] ");
+			}
+
+			if (move.getComment().length() > 0) {
+				System.out.print("/* " + move.getComment() + " */ ");
+			}
+
+			printVariations(move, num);
+		}
+	}
+
+	private static void printVariations(PGNMove move, int currentMoveNum) {
+
+        if (move.hasVariations()) {
+			Iterator<PGNVariation> vi = move.getVariationsIterator();
+
+			while (vi.hasNext()) {
+				System.out.print(" ( ");
+				printMoves(vi.next(), currentMoveNum);
+				System.out.print(" ) ");
+			}
         }
 
     }

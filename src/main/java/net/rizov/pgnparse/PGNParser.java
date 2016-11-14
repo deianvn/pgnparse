@@ -183,7 +183,9 @@ public class PGNParser {
                             int[] varaitionColor = color.clone();
                             handleBoardBackMove(lastMove, variationBoard, varaitionColor);
                             switchColor(varaitionColor);
-                            parse(lastMove, variationPgn, varaitionColor, variationBoard);
+                            PGNVariation variation = new PGNVariation();
+                            lastMove.addVariation(variation);
+                            parse(variation, variationPgn, varaitionColor, variationBoard);
                             i = k;
                             break;
                         }

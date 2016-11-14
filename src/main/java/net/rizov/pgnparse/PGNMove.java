@@ -15,7 +15,11 @@
  */
 package net.rizov.pgnparse;
 
-public class PGNMove extends PGNMoveContainer {
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+public class PGNMove {
 
 	private String move;
 
@@ -56,6 +60,8 @@ public class PGNMove extends PGNMoveContainer {
 	private boolean enpassantCapture;
 	
 	private String enpassantPieceSquare;
+
+    private List<PGNVariation> variations;
 
     public String getMove() {
         return move;
@@ -221,7 +227,19 @@ public class PGNMove extends PGNMoveContainer {
         return isKingSideCastle() || isQueenSideCastle();
     }
 
+    void addVariation(PGNVariation variation) {
+        if (variations == null) {
+            variations = new ArrayList<PGNVariation>();
+        }
+
+        variations.add(variation);
+    }
+
     public boolean hasVariations() {
-        return getMovesCount() > 0;
+        return variations != null && variations.size() > 0;
+    }
+
+    public Iterator<PGNVariation> getVariationsIterator() {
+        return new PGNUnmodifiableIterator<PGNVariation>(variations.iterator());
     }
 }
