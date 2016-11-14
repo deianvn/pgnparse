@@ -81,8 +81,6 @@ public class PGNParseTest {
 				System.out.print((num + 1) / 2 + ". ");
 			}
 
-			num++;
-
 			if (move.isEndGameMarked()) {
 				System.out.print("(" + move.getMove() + ")");
 			} else if (move.isKingSideCastle()) {
@@ -97,7 +95,7 @@ public class PGNParseTest {
 				System.out.print("/* " + move.getComment() + " */ ");
 			}
 
-			printVariations(move, num);
+			printVariations(move, num++);
 		}
 	}
 
