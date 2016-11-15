@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="778fad88-29b8-497d-8dfa-b27f7e823554" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/examples/java/net/rizov/pgnparse/examples/PGNParseBenchmark.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/PGNParser.java" afterPath="$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/PGNParser.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/examples/java/net/rizov/pgnparse/examples/PGNParserExample.java" afterPath="$PROJECT_DIR$/src/examples/java/net/rizov/pgnparse/examples/PGNParseExample.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/examples/java/net/rizov/pgnparse/examples/PGNParseBenchmark.java" afterPath="$PROJECT_DIR$/src/examples/java/net/rizov/pgnparse/examples/PGNParseBenchmark.java" />
     </list>
     <ignored path="pgnparse.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -132,8 +130,8 @@
       <file leaf-file-name="PGNParseBenchmark.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/examples/java/net/rizov/pgnparse/examples/PGNParseBenchmark.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="352">
-              <caret line="58" column="26" selection-start-line="58" selection-start-column="26" selection-end-line="58" selection-end-column="26" />
+            <state relative-caret-position="308">
+              <caret line="47" column="0" selection-start-line="47" selection-start-column="0" selection-end-line="47" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -1111,7 +1109,14 @@
       <option name="project" value="LOCAL" />
       <updated>1479224360736</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="- Add new example class for parsing directory of pgn files">
+      <created>1479225591039</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1479225591039</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -1166,7 +1171,8 @@
     <MESSAGE value="- Separate the test class from the library source code" />
     <MESSAGE value="- Add a few changes to readme.md" />
     <MESSAGE value="- Make use of Collections.unmodifiableList" />
-    <option name="LAST_COMMIT_MESSAGE" value="- Make use of Collections.unmodifiableList" />
+    <MESSAGE value="- Add new example class for parsing directory of pgn files" />
+    <option name="LAST_COMMIT_MESSAGE" value="- Add new example class for parsing directory of pgn files" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -1425,14 +1431,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/PGNParser.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="446">
-          <caret line="1051" column="0" selection-start-line="1051" selection-start-column="0" selection-end-line="1051" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/examples/java/net/rizov/pgnparse/examples/PGNParseExample.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="638">
@@ -1449,10 +1447,26 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/PGNParser.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="446">
+          <caret line="1051" column="0" selection-start-line="1051" selection-start-column="0" selection-end-line="1051" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://C:/Program Files/Java/jdk1.8.0_45/src.zip!/java/io/File.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="513">
+          <caret line="1153" column="20" selection-start-line="1153" selection-start-column="20" selection-end-line="1153" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/examples/java/net/rizov/pgnparse/examples/PGNParseBenchmark.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="352">
-          <caret line="58" column="26" selection-start-line="58" selection-start-column="26" selection-end-line="58" selection-end-column="26" />
+        <state relative-caret-position="308">
+          <caret line="47" column="0" selection-start-line="47" selection-start-column="0" selection-end-line="47" selection-end-column="0" />
           <folding />
         </state>
       </provider>

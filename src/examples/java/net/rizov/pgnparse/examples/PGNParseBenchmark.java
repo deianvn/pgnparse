@@ -16,7 +16,6 @@
  */
 package net.rizov.pgnparse.examples;
 
-import net.rizov.pgnparse.PGNGame;
 import net.rizov.pgnparse.PGNParseException;
 import net.rizov.pgnparse.PGNSource;
 
@@ -47,6 +46,10 @@ public class PGNParseBenchmark {
             }
         });
 
+        if (pgnFileNames == null) {
+            System.out.println("Error reading files");
+        }
+
         long startTime = System.currentTimeMillis();
         int filesParsed = 0;
         int gamesParsed = 0;
@@ -54,11 +57,7 @@ public class PGNParseBenchmark {
         for (String pgnFileName : pgnFileNames) {
             File pgnFile = new File(file.getAbsolutePath() + File.separator + pgnFileName);
             PGNSource source = new PGNSource(pgnFile);
-
-            for (PGNGame game : source.listGames()) {
-                gamesParsed++;
-            }
-
+            gamesParsed += source.listGames().size();
             filesParsed++;
         }
 
