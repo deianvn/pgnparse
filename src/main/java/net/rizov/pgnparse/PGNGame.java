@@ -27,12 +27,14 @@ public class PGNGame extends PGNMoveContainer {
 	
 	PGNGame() {
 		super();
+		this.pgn = "";
 		tags = new HashMap<String, String>();
 	}
 	
 	PGNGame(String pgn) {
-		this();
+		super();
 		this.pgn = pgn;
+		tags = new HashMap<String, String>();
 	}
 	
 	@Override

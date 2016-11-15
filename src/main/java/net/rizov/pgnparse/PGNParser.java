@@ -35,6 +35,26 @@ public class PGNParser {
 
     private static final String KING = "K";
 
+    private static final String MOVE_TYPE_1_RE = "[a-h][1-8]";
+
+    private static final int MOVE_TYPE_1_LENGTH = 2;
+
+    private static final String MOVE_TYPE_2_RE = "[" + PAWN + KNIGHT + BISHOP + ROOK + QUEEN + KING + "][a-h][1-8]";
+
+    private static final int MOVE_TYPE_2_LENGTH = 3;
+
+    private static final String MOVE_TYPE_3_RE = "[" + PAWN + KNIGHT + BISHOP + ROOK + QUEEN + KING + "][a-h][a-h][1-8]";
+
+    private static final int MOVE_TYPE_3_LENGTH = 4;
+
+    private static final String MOVE_TYPE_4_RE = "[" + PAWN + KNIGHT + BISHOP + ROOK + QUEEN + KING + "][a-h][1-8][a-h][1-8]";
+
+    private static final int MOVE_TYPE_4_LENGTH = 5;
+
+    private static final String MOVE_TYPE_5_RE = "[a-h][a-h][1-8]";
+
+    private static final String MOVE_TYPE_6_RE = "[" + PAWN + KNIGHT + BISHOP + ROOK + QUEEN + KING + "][1-8][a-h][1-8]";
+
     private static final byte WHITE = -1;
 
     private static final byte BLACK = 1;
@@ -65,26 +85,6 @@ public class PGNParser {
 
     private static final byte BLACK_KING = 6;
 
-    private static String MOVE_TYPE_1_RE = "[a-h][1-8]";
-
-    private static final int MOVE_TYPE_1_LENGTH = 2;
-
-    private static String MOVE_TYPE_2_RE = "[" + PAWN + KNIGHT + BISHOP + ROOK + QUEEN + KING + "][a-h][1-8]";
-
-    private static final int MOVE_TYPE_2_LENGTH = 3;
-
-    private static String MOVE_TYPE_3_RE = "[" + PAWN + KNIGHT + BISHOP + ROOK + QUEEN + KING + "][a-h][a-h][1-8]";
-
-    private static final int MOVE_TYPE_3_LENGTH = 4;
-
-    private static String MOVE_TYPE_4_RE = "[" + PAWN + KNIGHT + BISHOP + ROOK + QUEEN + KING + "][a-h][1-8][a-h][1-8]";
-
-    private static final int MOVE_TYPE_4_LENGTH = 5;
-
-    private static String MOVE_TYPE_5_RE = "[a-h][a-h][1-8]";
-
-    private static String MOVE_TYPE_6_RE = "[" + PAWN + KNIGHT + BISHOP + ROOK + QUEEN + KING + "][1-8][a-h][1-8]";
-
     private static final byte[][] KNIGHT_SEARCH_PATH = { { -1, 2 }, { 1, 2 }, { -1, -2 }, { 1, -2 }, { -2, 1 }, { -2, -1 }, { 2, -1 }, { 2, 1 } };
 
     private static final byte[][] BISHOP_SEARCH_PATH = { {1, 1}, {1, -1}, {-1, -1}, {-1, 1} };
@@ -93,7 +93,7 @@ public class PGNParser {
 
     private static final byte[][] QUEEN_KING_SEARCH_PATH = { {1, 1}, {1, -1}, {-1, -1}, {-1, 1}, {0, 1}, {1, 0}, {0, -1}, {-1, 0} };
 
-    public static PGNGame parse(String pgnGame) throws IOException, PGNParseException, MalformedMoveException {
+    public static PGNGame parsePGNGame(String pgnGame) throws PGNParseException {
         final PGNGame game = new PGNGame(pgnGame);
         final byte[][] board = createDefaultBoard();
         final int[] color = { WHITE };
@@ -101,33 +101,78 @@ public class PGNParser {
         BufferedReader br = new BufferedReader(new StringReader(pgnGame));
         String line;
         StringBuilder pgn = new StringBuilder();
+        int lineNumber = 1;
 
-        while ((line = br.readLine()) != null) {
-            line = line.trim();
+        try {
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
 
-            if (line.startsWith("@")) {
-                continue;
-            }
-
-            if (line.startsWith("[")) {
-                try {
-                    String tagName = line.substring(1, line.indexOf("\"")).trim();
-                    String tagValue = line.substring(line.indexOf("\"") + 1,
-                            line.lastIndexOf("\""));
-                    game.addTag(tagName, tagValue);
-                } catch (IndexOutOfBoundsException e) {
-
+                if (line.startsWith("@")) {
+                    lineNumber++;
+                    continue;
                 }
-            } else {
-                if (!line.isEmpty()) {
-                    pgn.append(line + "\n");
+
+                if (line.startsWith("[")) {
+                    try {
+                        String tagName = line.substring(1, line.indexOf("\"")).trim();
+                        String tagValue = line.substring(line.indexOf("\"") + 1,
+                                line.lastIndexOf("\""));
+                        game.addTag(tagName, tagValue);
+                    } catch (IndexOutOfBoundsException e) {
+                        throw new PGNParseException("Error in line " + lineNumber);
+                    }
+                } else {
+                    if (!line.isEmpty()) {
+                        pgn.append(line + "\n");
+                    }
                 }
+
+                lineNumber++;
             }
+        } catch (IOException e) {
+            throw new PGNParseException(e);
+        } finally {
+            try {
+                br.close();
+            } catch (IOException e) {}
         }
 
         parse(game, pgn.toString(), color, board);
         return game;
     }
+
+    public static List<String> splitPGNString(String pgn) throws PGNParseException {
+        List<String> pgnGames = new LinkedList<String>();
+        BufferedReader br = new BufferedReader(new StringReader(pgn));
+        String line;
+        StringBuilder buffer = new StringBuilder();
+
+        try {
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+
+                if (!line.isEmpty()) {
+                    buffer.append(line + "\n");
+
+                    if (line.endsWith("1-0") || line.endsWith("0-1") || line.endsWith("1/2-1/2") || line.endsWith("*")) {
+                        pgnGames.add(buffer.toString());
+                        buffer.delete(0, buffer.length());
+                    }
+                }
+
+            }
+        } catch (IOException e) {
+            throw new PGNParseException(e);
+        } finally {
+            try {
+                br.close();
+            } catch (IOException e) {}
+        }
+
+        return pgnGames;
+    }
+
+
 
     private static int getLineEndIndex(String line, int start) {
         int index = line.indexOf('\n', start);
@@ -139,7 +184,7 @@ public class PGNParser {
         return index;
     }
 
-    private static void parse(PGNMoveContainer container, String pgn, int[] color, byte[][] board) throws IOException, PGNParseException, MalformedMoveException {
+    private static void parse(PGNMoveContainer container, String pgn, int[] color, byte[][] board) throws PGNParseException {
 
         StringBuilder token = new StringBuilder();
 
@@ -255,49 +300,27 @@ public class PGNParser {
         }
     }
 
-    private static void processMoveToken(String token, PGNMoveContainer container, byte[][] board, int[] color) throws MalformedMoveException, PGNParseException {
+    private static void processMoveToken(String token, PGNMoveContainer container, byte[][] board, int[] color) throws PGNParseException {
         token = token.replaceAll("\\s*\\d+\\.+\\s*", "");
 
         if (token.length() > 0) {
-            handleToken(token, container, board, color);
+            try {
+                handleToken(token, container, board, color);
+            } catch (RuntimeException e) {
+                throw new PGNParseException("Eror near token: " + token);
+            }
         }
     }
 
-    private static void processCommentToken(String token, PGNMoveContainer container) throws MalformedMoveException {
+    private static void processCommentToken(String token, PGNMoveContainer container) throws PGNParseException {
         if (container.getMovesCount() > 0) {
             container.getMove(container.getMovesCount() - 1).setComment(token);
         } else {
-            throw new MalformedMoveException(token);
+            throw new PGNParseException("Error near token: " + token);
         }
     }
 
-    public static List<String> splitPGN(String pgn) throws IOException {
-        List<String> pgnGames = new LinkedList<String>();
-        BufferedReader br = new BufferedReader(new StringReader(pgn));
-        String line;
-        StringBuilder buffer = new StringBuilder();
-
-        while ((line = br.readLine()) != null) {
-            line = line.trim();
-
-            if (!line.isEmpty()) {
-                buffer.append(line + "\n");
-
-                if (line.endsWith("1-0") || line.endsWith("0-1") || line.endsWith("1/2-1/2") || line.endsWith("*")) {
-                    pgnGames.add(buffer.toString());
-                    buffer.delete(0, buffer.length());
-                }
-            }
-
-        }
-
-        br.close();
-
-        return pgnGames;
-    }
-
-    static PGNMove parseMove(String move) throws MalformedMoveException {
-
+    static PGNMove parseMove(String move) throws PGNParseException, IndexOutOfBoundsException {
         PGNMove pgnMove = new PGNMove();
         pgnMove.setFullMove(move);
         String piece;
@@ -336,26 +359,22 @@ public class PGNParser {
         }
 
         if (move.contains("=")) {
-            try {
-                String promotedPiece = move.substring(move.indexOf('=') + 1);
+            String promotedPiece = move.substring(move.indexOf('=') + 1);
 
-                if (promotedPiece.equals(PAWN)
-                        || promotedPiece.equals(KNIGHT)
-                        || promotedPiece.equals(BISHOP)
-                        || promotedPiece.equals(ROOK)
-                        || promotedPiece.equals(QUEEN)
-                        || promotedPiece.equals(KING))
-                {
-                    move = move.substring(0, move.indexOf('='));
-                    pgnMove.setPromoted(true);
-                    pgnMove.setPromotion(promotedPiece);
-                }
-                else
-                {
-                    throw new MalformedMoveException("Wrong piece abr [" + promotedPiece + "]");
-                }
-            } catch (IndexOutOfBoundsException e) {
-                throw new MalformedMoveException(e);
+            if (promotedPiece.equals(PAWN)
+                    || promotedPiece.equals(KNIGHT)
+                    || promotedPiece.equals(BISHOP)
+                    || promotedPiece.equals(ROOK)
+                    || promotedPiece.equals(QUEEN)
+                    || promotedPiece.equals(KING))
+            {
+                move = move.substring(0, move.indexOf('='));
+                pgnMove.setPromoted(true);
+                pgnMove.setPromotion(promotedPiece);
+            }
+            else
+            {
+                throw new PGNParseException("Wrong piece abr [" + promotedPiece + "]");
             }
         }
 
@@ -373,7 +392,7 @@ public class PGNParser {
         return pgnMove;
     }
 
-    private static void handleToken(String token, PGNMoveContainer container, byte[][] board, int[] color) throws MalformedMoveException, PGNParseException, NullPointerException {
+    private static void handleToken(String token, PGNMoveContainer container, byte[][] board, int[] color) throws PGNParseException {
 
         PGNMove move = null;
 
@@ -400,37 +419,7 @@ public class PGNParser {
                 updateNextMove(move, board);
                 switchColor(color);
             } else {
-                throw new PGNParseException(move.getFullMove());
-            }
-        }
-    }
-
-    private static void handleTokens(String[] tokens, PGNMoveContainer container, byte[][] board, int[] color) throws MalformedMoveException, PGNParseException, NullPointerException {
-        PGNMove move = null;
-
-        for (int i = 0; i < tokens.length; i++) {
-
-            if (tokens[i].equals("e.p.")) {
-                continue;
-            } else if (tokens[i].startsWith("{") && tokens[i].endsWith("}")) {
-                move.setComment(tokens[i].substring(1, tokens[i].length() - 1));
-            } else {
-                move = parseMove(tokens[i]);
-
-                if (validateMove(move)) {
-
-                    if (color[0] == WHITE) {
-                        move.setColor(Color.white);
-                    } else {
-                        move.setColor(Color.black);
-                    }
-
-                    container.addMove(move);
-                    updateNextMove(move, board);
-                    switchColor(color);
-                } else {
-                    throw new PGNParseException(move.getFullMove());
-                }
+                throw new PGNParseException("Error near token: " + token);
             }
         }
     }
@@ -476,9 +465,7 @@ public class PGNParser {
 
             }
 
-        } else if (move.isEndGameMarked()) {
-            //Handle situation
-        } else {
+        } else if (!move.isEndGameMarked()) {
             switch (strippedMove.length()) {
                 case MOVE_TYPE_1_LENGTH :
                     handleMoveType1(move, strippedMove, color, board);
@@ -506,52 +493,48 @@ public class PGNParser {
                     break;
             }
 
-            try {
-                byte capturedPiece = board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'];
-                board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'] = board[getChessATOI(move.getFromSquare().charAt(0))][move.getFromSquare().charAt(1) - '1'];
-                board[getChessATOI(move.getFromSquare().charAt(0))][move.getFromSquare().charAt(1) - '1'] = EMPTY;
+            byte capturedPiece = board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'];
+            board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'] = board[getChessATOI(move.getFromSquare().charAt(0))][move.getFromSquare().charAt(1) - '1'];
+            board[getChessATOI(move.getFromSquare().charAt(0))][move.getFromSquare().charAt(1) - '1'] = EMPTY;
 
-                if (move.isEnpassantCapture()) {
-                    capturedPiece = board[getChessATOI(move.getEnpassantPieceSquare().charAt(0))][move.getEnpassantPieceSquare().charAt(1) - '1'];
-                    board[getChessATOI(move.getEnpassantPieceSquare().charAt(0))][move.getEnpassantPieceSquare().charAt(1) - '1'] = EMPTY;
-                }
+            if (move.isEnpassantCapture()) {
+                capturedPiece = board[getChessATOI(move.getEnpassantPieceSquare().charAt(0))][move.getEnpassantPieceSquare().charAt(1) - '1'];
+                board[getChessATOI(move.getEnpassantPieceSquare().charAt(0))][move.getEnpassantPieceSquare().charAt(1) - '1'] = EMPTY;
+            }
 
-                if (capturedPiece != EMPTY) {
-                    switch (Math.abs(capturedPiece)) {
-                        case BLACK_PAWN :
-                            move.setCapturedPiece(PAWN);
-                            break;
-                        case BLACK_ROOK :
-                            move.setCapturedPiece(ROOK);
-                            break;
-                        case BLACK_KNIGHT :
-                            move.setCapturedPiece(KNIGHT);
-                            break;
-                        case BLACK_BISHOP :
-                            move.setCapturedPiece(BISHOP);
-                            break;
-                        case BLACK_QUEEN :
-                            move.setCapturedPiece(QUEEN);
-                            break;
-                        case BLACK_KING :
-                            move.setCapturedPiece(KING);
-                            break;
-                    }
+            if (capturedPiece != EMPTY) {
+                switch (Math.abs(capturedPiece)) {
+                    case BLACK_PAWN :
+                        move.setCapturedPiece(PAWN);
+                        break;
+                    case BLACK_ROOK :
+                        move.setCapturedPiece(ROOK);
+                        break;
+                    case BLACK_KNIGHT :
+                        move.setCapturedPiece(KNIGHT);
+                        break;
+                    case BLACK_BISHOP :
+                        move.setCapturedPiece(BISHOP);
+                        break;
+                    case BLACK_QUEEN :
+                        move.setCapturedPiece(QUEEN);
+                        break;
+                    case BLACK_KING :
+                        move.setCapturedPiece(KING);
+                        break;
                 }
+            }
 
-                if (move.isPromoted()) {
-                    if (move.getPromotion().equals(QUEEN)) {
-                        board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'] = (byte)(BLACK_QUEEN * color);
-                    } else if (move.getPromotion().equals(ROOK)) {
-                        board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'] = (byte)(BLACK_ROOK * color);
-                    } else if (move.getPromotion().equals(BISHOP)) {
-                        board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'] = (byte)(BLACK_BISHOP * color);
-                    } else if (move.getPromotion().equals(KNIGHT)) {
-                        board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'] = (byte)(BLACK_KNIGHT * color);
-                    }
+            if (move.isPromoted()) {
+                if (move.getPromotion().equals(QUEEN)) {
+                    board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'] = (byte)(BLACK_QUEEN * color);
+                } else if (move.getPromotion().equals(ROOK)) {
+                    board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'] = (byte)(BLACK_ROOK * color);
+                } else if (move.getPromotion().equals(BISHOP)) {
+                    board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'] = (byte)(BLACK_BISHOP * color);
+                } else if (move.getPromotion().equals(KNIGHT)) {
+                    board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'] = (byte)(BLACK_KNIGHT * color);
                 }
-            } catch (IndexOutOfBoundsException e) {
-                throw new PGNParseException(move.getFromSquare() + " " + move.getToSquare(), e);
             }
 
         }
@@ -566,7 +549,7 @@ public class PGNParser {
         int fromhPos = tohPos;
 
         if (fromvPos == - 1) {
-            throw new PGNParseException(move.getFullMove());
+            throw new PGNParseException("Invalid move: " + move.getFullMove());
         }
 
         move.setFromSquare(getChessCoords(fromhPos, fromvPos));
@@ -589,7 +572,7 @@ public class PGNParser {
             int[]  fromPos = getSingleMovePiecePos(tohPos, tovPos, piece, board, KNIGHT_SEARCH_PATH);
 
             if (fromPos == null) {
-                throw new PGNParseException(move.getFullMove());
+                throw new PGNParseException("Invalid move: " + move.getFullMove());
             }
 
             fromhPos = fromPos[0];
@@ -599,7 +582,7 @@ public class PGNParser {
             int[] fromPos = getMultiMovePiecePos(tohPos, tovPos, piece, board, BISHOP_SEARCH_PATH);
 
             if (fromPos == null) {
-                throw new PGNParseException(move.getFullMove());
+                throw new PGNParseException("Invalid move: " + move.getFullMove());
             }
 
             fromhPos = fromPos[0];
@@ -619,7 +602,7 @@ public class PGNParser {
             int[] fromPos = getMultiMovePiecePos(tohPos, tovPos, piece, board, QUEEN_KING_SEARCH_PATH);
 
             if (fromPos == null) {
-                throw new PGNParseException(move.getFullMove());
+                throw new PGNParseException("Invalid move: " + move.getFullMove());
             }
 
             fromhPos = fromPos[0];
@@ -629,7 +612,7 @@ public class PGNParser {
             int[]  fromPos = getSingleMovePiecePos(tohPos, tovPos, piece, board, QUEEN_KING_SEARCH_PATH);
 
             if (fromPos == null) {
-                throw new PGNParseException(move.getFullMove());
+                throw new PGNParseException("Invalid move: " + move.getFullMove());
             }
 
             fromhPos = fromPos[0];
@@ -637,7 +620,7 @@ public class PGNParser {
         }
 
         if (fromvPos == - 1 || fromhPos == -1) {
-            throw new PGNParseException(move.getFullMove());
+            throw new PGNParseException("Invalid move: " + move.getFullMove());
         }
 
         move.setFromSquare(getChessCoords(fromhPos, fromvPos));
@@ -672,7 +655,7 @@ public class PGNParser {
         }
 
         if (fromvPos == - 1 || fromhPos == -1) {
-            throw new PGNParseException(move.getFullMove());
+            throw new PGNParseException("Invalid move: " + move.getFullMove());
         }
 
         move.setFromSquare(getChessCoords(fromhPos, fromvPos));
@@ -701,11 +684,11 @@ public class PGNParser {
         }
 
         if (fromvPos == - 1 || fromhPos == -1) {
-            throw new PGNParseException(move.getFullMove());
+            throw new PGNParseException("Invalid move: " + move.getFullMove());
         }
 
         if (board[fromhPos][fromvPos] != piece) {
-            throw new PGNParseException("Piece does not match");
+            throw new PGNParseException("Invalid move: " + move.getFullMove());
         }
 
         move.setFromSquare(getChessCoords(fromhPos, fromvPos));
@@ -720,7 +703,7 @@ public class PGNParser {
         int fromvPos = getPawnvPos(fromhPos, tovPos, piece, board);
 
         if (fromvPos == - 1) {
-            throw new PGNParseException(move.getFullMove());
+            throw new PGNParseException("Invalid move: " + move.getFullMove());
         }
 
         if (move.isCaptured()) {
@@ -731,7 +714,7 @@ public class PGNParser {
                     move.setEnpassantCapture(true);
                     move.setEnpassantPieceSquare(getChessCoords(tohPos, enPassantvPos));
                 } else {
-                    throw new PGNParseException(move.getFullMove() + " : " + "Enpassant capture expected!");
+                    throw new PGNParseException("Invalid move (Enpassant capture expected): " + move.getFullMove());
                 }
             }
         }
@@ -748,7 +731,7 @@ public class PGNParser {
         int fromhPos = -1;
 
         if (strippedMove.charAt(0) == PAWN.charAt(0)) {
-            throw new PGNParseException(strippedMove + " : pawn found");
+            throw new PGNParseException("Invalid move: " + move.getFullMove());
         } else if (strippedMove.charAt(0) == KNIGHT.charAt(0)) {
             piece = (byte)(BLACK_KNIGHT * color);
             fromhPos = getSingleMovePiecehPos(tohPos, tovPos, fromvPos, piece, board, KNIGHT_SEARCH_PATH);
@@ -767,7 +750,7 @@ public class PGNParser {
         }
 
         if (fromvPos == -1 || fromhPos == -1) {
-            throw new PGNParseException(move.getFullMove());
+            throw new PGNParseException("Invalid move: " + move.getFullMove());
         }
 
         move.setFromSquare(getChessCoords(fromhPos, fromvPos));
@@ -1025,8 +1008,6 @@ public class PGNParser {
                 }
             }
         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         }
 
         return false;
@@ -1094,16 +1075,6 @@ public class PGNParser {
         }
 
         return (byte)p;
-    }
-
-    private static void printBoard(byte[][] board) {
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[i].length; j++) {
-                System.out.print(board[j][i] + "\t");
-            }
-            System.out.println();
-        }
-        System.out.println();
     }
 
 }

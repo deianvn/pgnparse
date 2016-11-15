@@ -63,31 +63,30 @@ public class PGNSource {
 		return source;
 	}
 	
-	public List<PGNGame> listGames() throws IOException, PGNParseException, MalformedMoveException {
-		List<String> pgns = PGNParser.splitPGN(source);
+	public List<PGNGame> listGames() throws PGNParseException {
+		List<String> pgns = PGNParser.splitPGNString(source);
 		ArrayList<PGNGame> games = new ArrayList<PGNGame>();
 
 		for (String pgn : pgns) {
-			games.add(PGNParser.parse(pgn));
+			games.add(PGNParser.parsePGNGame(pgn));
 		}
 
 		return games;
 	}
 	
-	public List<PGNGame> listGames(boolean force) throws IOException, PGNParseException, MalformedMoveException {
+	public List<PGNGame> listGames(boolean force) throws PGNParseException {
 
 		if (!force) {
 			return listGames();
 		}
 
-		List<String> pgns = PGNParser.splitPGN(source);
+		List<String> pgns = PGNParser.splitPGNString(source);
 		ArrayList<PGNGame> games = new ArrayList<PGNGame>();
 
 		for (String pgn : pgns) {
 			try {
-				games.add(PGNParser.parse(pgn));
-			} catch (PGNParseException e) {
-			} catch (MalformedMoveException e) {}
+				games.add(PGNParser.parsePGNGame(pgn));
+			} catch (PGNParseException e) {}
 		}
 
 		return games;
