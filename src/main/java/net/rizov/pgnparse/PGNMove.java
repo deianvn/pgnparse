@@ -16,6 +16,7 @@
 package net.rizov.pgnparse;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -239,7 +240,11 @@ public class PGNMove {
         return variations != null && variations.size() > 0;
     }
 
+    public List<PGNVariation> getVariations() {
+        return Collections.unmodifiableList(variations);
+    }
+
     public Iterator<PGNVariation> getVariationsIterator() {
-        return new PGNUnmodifiableIterator<PGNVariation>(variations.iterator());
+        return Collections.unmodifiableList(variations).iterator();
     }
 }

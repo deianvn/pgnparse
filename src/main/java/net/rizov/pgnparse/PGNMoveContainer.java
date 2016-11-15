@@ -15,6 +15,7 @@
  */
 package net.rizov.pgnparse;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,8 +36,12 @@ public abstract class PGNMoveContainer {
         return moves.get(index);
     }
 
+    public List<PGNMove> getMove() {
+        return Collections.unmodifiableList(moves);
+    }
+
     public Iterator<PGNMove> getMovesIterator() {
-        return new PGNUnmodifiableIterator<PGNMove>(moves.iterator());
+        return Collections.unmodifiableList(moves).iterator();
     }
 
     public int getMovesCount() {
