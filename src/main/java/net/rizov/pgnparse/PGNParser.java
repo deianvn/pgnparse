@@ -1042,6 +1042,10 @@ public class PGNParser {
         };
     }
 
+    private static String getFEN(byte[][] board) {
+        return null;
+    }
+
     private static byte[][] createBoard(String fen) {
         return null;
     }

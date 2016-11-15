@@ -28,7 +28,7 @@ import java.util.Iterator;
  * @author Deyan Rizov
  *
  */
-public class PGNParserExample {
+public class PGNParseExample {
 
 	public static void main(String[] args) throws IOException, PGNParseException {
 		if (args.length == 0) {
