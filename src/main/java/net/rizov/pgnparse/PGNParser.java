@@ -120,7 +120,7 @@ public class PGNParser {
                         game.addTag(tagName, tagValue);
 
                         if (tagName.compareTo("FEN") == 0) {
-                            //fen = tagValue;
+                            fen = tagValue;
                         }
                     } catch (IndexOutOfBoundsException e) {
                         throw new PGNParseException("Error in line " + lineNumber);
@@ -1066,12 +1066,13 @@ public class PGNParser {
             Arrays.fill(board[i], EMPTY);
         }
 
-        for (int i = 7; i >= 0; i--) {
+        for (int i = 0; i < 8; i++) {
             String line = tokens[i];
 
             for (int j = 0; j < line.length(); j++) {
                 char ch = line.charAt(j);
 
+                System.out.print(ch + " ");
                 if (ch >= '1' && ch <= '8') {
                     j += ch - '1';
                     continue;
@@ -1089,7 +1090,7 @@ public class PGNParser {
                     throw new PGNParseException(ch + "Invalid FEN position: " + fen);
                 }
 
-                board[i][j] = piece;
+                board[j][7 - i] = piece;
             }
         }
 
@@ -1153,13 +1154,6 @@ public class PGNParser {
             state.fullMovesCount = fullMoves;
         } catch (NumberFormatException e) {
             throw new PGNParseException("Invalid FEN position: " + fen);
-        }
-
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                System.out.print(board[i][j]);
-            }
-            System.out.println();
         }
 
         return state;
