@@ -1072,7 +1072,6 @@ public class PGNParser {
             for (int j = 0; j < line.length(); j++) {
                 char ch = line.charAt(j);
 
-                System.out.print(ch + " ");
                 if (ch >= '1' && ch <= '8') {
                     j += ch - '1';
                     continue;
