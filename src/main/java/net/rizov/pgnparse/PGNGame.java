@@ -18,40 +18,61 @@ package net.rizov.pgnparse;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 public class PGNGame extends PGNMoveContainer {
 
 	private Map<String, String> tags;
 	
 	private String pgn;
-	
-	PGNGame() {
-		super();
-		this.pgn = "";
-		tags = new HashMap<String, String>();
-	}
+
+	private int startPositionHalfMovesCount;
+
+	private int startPositionFullMovesCount;
 	
 	PGNGame(String pgn) {
 		super();
 		this.pgn = pgn;
 		tags = new HashMap<String, String>();
+        startPositionHalfMovesCount = 0;
+        startPositionFullMovesCount = 0;
 	}
 	
 	@Override
 	public String toString() {
 		return pgn == null ? "" : pgn;
 	}
-	
+
+	void setStartPositionFullMovesCount(int startPositionFullMovesCount) {
+		this.startPositionFullMovesCount = startPositionFullMovesCount;
+	}
+
+	public int getStartPositionHalfMovesCount() {
+		return startPositionHalfMovesCount;
+	}
+
+	void setStartPositionHalfMovesCount(int startPositionHalfMovesCount) {
+		this.startPositionHalfMovesCount = startPositionHalfMovesCount;
+	}
+
+	public int getStartPositionFullMovesCount() {
+		return startPositionFullMovesCount;
+	}
+
 	void addTag(String key, String value) {
 		tags.put(key, value);
 	}
-	
+
 	void removeTag(String key) {
 		tags.remove(key);
 	}
 	
 	public String getTag(String key) {
 		return tags.get(key);
+	}
+
+	public Set<String> getTagKeys() {
+		return tags.keySet();
 	}
 	
 	public Iterator<String> getTagKeysIterator() {
@@ -64,6 +85,10 @@ public class PGNGame extends PGNMoveContainer {
 	
 	public int getTagsCount() {
 		return tags.size();
+	}
+
+	public String getFEN(PGNMove move) {
+		return null;
 	}
 	
 }

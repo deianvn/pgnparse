@@ -17,6 +17,7 @@
 package net.rizov.pgnparse.examples;
 
 import net.rizov.pgnparse.*;
+import net.rizov.pgnparse.PGNParseException;
 
 import java.io.File;
 import java.io.IOException;

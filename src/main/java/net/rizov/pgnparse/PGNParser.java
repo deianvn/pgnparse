@@ -18,22 +18,23 @@ package net.rizov.pgnparse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
 public class PGNParser {
 
-    private static final String PAWN = "P";
+    static final String PAWN = "P";
 
-    private static final String KNIGHT = "N";
+    static final String KNIGHT = "N";
 
-    private static final String BISHOP = "B";
+    static final String BISHOP = "B";
 
-    private static final String ROOK = "R";
+    static final String ROOK = "R";
 
-    private static final String QUEEN = "Q";
+    static final String QUEEN = "Q";
 
-    private static final String KING = "K";
+    static final String KING = "K";
 
     private static final String MOVE_TYPE_1_RE = "[a-h][1-8]";
 
@@ -55,53 +56,52 @@ public class PGNParser {
 
     private static final String MOVE_TYPE_6_RE = "[" + PAWN + KNIGHT + BISHOP + ROOK + QUEEN + KING + "][1-8][a-h][1-8]";
 
-    private static final byte WHITE = -1;
+    static final int WHITE = -1;
 
-    private static final byte BLACK = 1;
+    static final int BLACK = 1;
 
-    private static final byte WHITE_PAWN = -1;
+    private static final int WHITE_PAWN = -1;
 
-    private static final byte WHITE_KNIGHT = -2;
+    private static final int WHITE_KNIGHT = -2;
 
-    private static final byte WHITE_BISHOP = -3;
+    private static final int WHITE_BISHOP = -3;
 
-    private static final byte WHITE_ROOK = -4;
+    private static final int WHITE_ROOK = -4;
 
-    private static final byte WHITE_QUEEN = -5;
+    private static final int WHITE_QUEEN = -5;
 
-    private static final byte WHITE_KING = -6;
+    private static final int WHITE_KING = -6;
 
-    private static final byte EMPTY = 0;
+    private static final int EMPTY = 0;
 
-    private static final byte BLACK_PAWN = 1;
+    private static final int BLACK_PAWN = 1;
 
-    private static final byte BLACK_KNIGHT = 2;
+    private static final int BLACK_KNIGHT = 2;
 
-    private static final byte BLACK_BISHOP = 3;
+    private static final int BLACK_BISHOP = 3;
 
-    private static final byte BLACK_ROOK = 4;
+    private static final int BLACK_ROOK = 4;
 
-    private static final byte BLACK_QUEEN = 5;
+    private static final int BLACK_QUEEN = 5;
 
-    private static final byte BLACK_KING = 6;
+    private static final int BLACK_KING = 6;
 
-    private static final byte[][] KNIGHT_SEARCH_PATH = { { -1, 2 }, { 1, 2 }, { -1, -2 }, { 1, -2 }, { -2, 1 }, { -2, -1 }, { 2, -1 }, { 2, 1 } };
+    private static final int[][] KNIGHT_SEARCH_PATH = { { -1, 2 }, { 1, 2 }, { -1, -2 }, { 1, -2 }, { -2, 1 }, { -2, -1 }, { 2, -1 }, { 2, 1 } };
 
-    private static final byte[][] BISHOP_SEARCH_PATH = { {1, 1}, {1, -1}, {-1, -1}, {-1, 1} };
+    private static final int[][] BISHOP_SEARCH_PATH = { {1, 1}, {1, -1}, {-1, -1}, {-1, 1} };
 
-    private static final byte[][] ROOK_SEARCH_PATH = { {0, 1}, {1, 0}, {0, -1}, {-1, 0} };
+    private static final int[][] ROOK_SEARCH_PATH = { {0, 1}, {1, 0}, {0, -1}, {-1, 0} };
 
-    private static final byte[][] QUEEN_KING_SEARCH_PATH = { {1, 1}, {1, -1}, {-1, -1}, {-1, 1}, {0, 1}, {1, 0}, {0, -1}, {-1, 0} };
+    private static final int[][] QUEEN_KING_SEARCH_PATH = { {1, 1}, {1, -1}, {-1, -1}, {-1, 1}, {0, 1}, {1, 0}, {0, -1}, {-1, 0} };
 
     public static PGNGame parsePGNGame(String pgnGame) throws PGNParseException {
         final PGNGame game = new PGNGame(pgnGame);
-        final byte[][] board = createDefaultBoard();
-        final int[] color = { WHITE };
 
         BufferedReader br = new BufferedReader(new StringReader(pgnGame));
         String line;
         StringBuilder pgn = new StringBuilder();
         int lineNumber = 1;
+        String fen = null;
 
         try {
             while ((line = br.readLine()) != null) {
@@ -118,6 +118,10 @@ public class PGNParser {
                         String tagValue = line.substring(line.indexOf("\"") + 1,
                                 line.lastIndexOf("\""));
                         game.addTag(tagName, tagValue);
+
+                        if (tagName.compareTo("FEN") == 0) {
+                            //fen = tagValue;
+                        }
                     } catch (IndexOutOfBoundsException e) {
                         throw new PGNParseException("Error in line " + lineNumber);
                     }
@@ -137,7 +141,8 @@ public class PGNParser {
             } catch (IOException e) {}
         }
 
-        parse(game, pgn.toString(), color, board);
+        final PGNParserGameState state = (fen == null) ? createDefaultGameState() : createGameState(fen);
+        parse(game, pgn.toString(), state);
         return game;
     }
 
@@ -184,7 +189,7 @@ public class PGNParser {
         return index;
     }
 
-    private static void parse(PGNMoveContainer container, String pgn, int[] color, byte[][] board) throws PGNParseException {
+    private static void parse(PGNMoveContainer container, String pgn, final PGNParserGameState state) throws PGNParseException {
 
         StringBuilder token = new StringBuilder();
 
@@ -195,7 +200,7 @@ public class PGNParser {
             if (ch != ' ' && ch != '\n' && ch != '{' && ch != ';' && ch != '(') {
                 token.append(ch);
             } else {
-                processMoveToken(token.toString().trim(), container, board, color);
+                processMoveToken(token.toString().trim(), container, state);
                 token.delete(0, token.length());
 
                 if (ch == ';') {
@@ -224,13 +229,12 @@ public class PGNParser {
                         } else if (nextCh == ')' && --end == 0) {
                             String variationPgn = pgn.substring(i+1, k);
                             PGNMove lastMove = container.getMove(container.getMovesCount() - 1);
-                            byte[][] variationBoard = cloneBoard(board);
-                            int[] varaitionColor = color.clone();
-                            handleBoardBackMove(lastMove, variationBoard, varaitionColor);
-                            switchColor(varaitionColor);
+                            PGNParserGameState variationGameState = state.clone();
+                            handleGameStateBackMove(lastMove, variationGameState);
+                            variationGameState.switchPlayer();
                             PGNVariation variation = new PGNVariation();
                             lastMove.addVariation(variation);
-                            parse(variation, variationPgn, varaitionColor, variationBoard);
+                            parse(variation, variationPgn, variationGameState);
                             i = k;
                             break;
                         }
@@ -240,10 +244,12 @@ public class PGNParser {
             }
         }
 
-        processMoveToken(token.toString().trim(), container, board, color);
+        processMoveToken(token.toString().trim(), container, state);
     }
 
-    private static void handleBoardBackMove(PGNMove move, byte[][] board, int[] color) {
+    private static void handleGameStateBackMove(PGNMove move, final PGNParserGameState state) {
+
+        int[][] board = state.board;
 
         if (move.isCastle()) {
             if (move.isKingSideCastle()) {
@@ -278,15 +284,16 @@ public class PGNParser {
         } else {
             String from = move.getFromSquare();
             String to = move.getToSquare();
+            int color = state.currentPlayer;
 
             if (move.isPromoted()) {
-                board[getChessATOI(from.charAt(0))][from.charAt(1) - '1'] = (byte)(BLACK_PAWN * color[0]);
+                board[getChessATOI(from.charAt(0))][from.charAt(1) - '1'] = BLACK_PAWN * color;
             } else {
                 board[getChessATOI(from.charAt(0))][from.charAt(1) - '1'] = board[getChessATOI(to.charAt(0))][to.charAt(1) - '1'];
             }
 
             if (move.isCaptured()) {
-                byte piece = pieceToByte(move.getCapturedPiece(), color[0] * -1);
+                int piece = pieceToInt(move.getCapturedPiece(), color * -1);
 
                 if (move.isEnpassant()) {
                     String ep = move.getEnpassantPieceSquare();
@@ -300,12 +307,12 @@ public class PGNParser {
         }
     }
 
-    private static void processMoveToken(String token, PGNMoveContainer container, byte[][] board, int[] color) throws PGNParseException {
+    private static void processMoveToken(String token, PGNMoveContainer container, final PGNParserGameState state) throws PGNParseException {
         token = token.replaceAll("\\s*\\d+\\.+\\s*", "");
 
         if (token.length() > 0) {
             try {
-                handleToken(token, container, board, color);
+                handleToken(token, container, state);
             } catch (RuntimeException e) {
                 throw new PGNParseException("Eror near token: " + token);
             }
@@ -392,7 +399,7 @@ public class PGNParser {
         return pgnMove;
     }
 
-    private static void handleToken(String token, PGNMoveContainer container, byte[][] board, int[] color) throws PGNParseException {
+    private static void handleToken(String token, PGNMoveContainer container, final PGNParserGameState state) throws PGNParseException {
 
         PGNMove move = null;
 
@@ -409,31 +416,24 @@ public class PGNParser {
 
             if (validateMove(move)) {
 
-                if (color[0] == WHITE) {
+                if (state.currentPlayer == WHITE) {
                     move.setColor(Color.white);
                 } else {
                     move.setColor(Color.black);
                 }
 
                 container.addMove(move);
-                updateNextMove(move, board);
-                switchColor(color);
+                updateNextMove(move, state);
+                state.switchPlayer();
             } else {
                 throw new PGNParseException("Error near token: " + token);
             }
         }
     }
 
-    private static void updateNextMove(PGNMove move, byte[][] board) throws PGNParseException {
-
+    private static void updateNextMove(PGNMove move, final PGNParserGameState state) throws PGNParseException {
+        int[][] board = state.board;
         String strippedMove = move.getMove();
-        byte color;
-
-        if (move.getColor() == Color.white) {
-            color = WHITE;
-        } else {
-            color = BLACK;
-        }
 
         if (move.isCastle()) {
             if (move.isKingSideCastle()) {
@@ -468,32 +468,32 @@ public class PGNParser {
         } else if (!move.isEndGameMarked()) {
             switch (strippedMove.length()) {
                 case MOVE_TYPE_1_LENGTH :
-                    handleMoveType1(move, strippedMove, color, board);
+                    handleMoveType1(move, strippedMove, state);
 
                     break;
                 case MOVE_TYPE_2_LENGTH :
                     if (strippedMove.matches(MOVE_TYPE_2_RE)) {
-                        handleMoveType2(move, strippedMove, color, board);
+                        handleMoveType2(move, strippedMove, state);
                     } else if (strippedMove.matches(MOVE_TYPE_5_RE)) {
-                        handleMoveType5(move, strippedMove, color, board);
+                        handleMoveType5(move, strippedMove, state);
                     }
 
                     break;
                 case MOVE_TYPE_3_LENGTH :
                     if (strippedMove.matches(MOVE_TYPE_3_RE)) {
-                        handleMoveType3(move, strippedMove, color, board);
+                        handleMoveType3(move, strippedMove, state);
                     } else if (strippedMove.matches(MOVE_TYPE_6_RE)) {
-                        handleMoveType6(move, strippedMove, color, board);
+                        handleMoveType6(move, strippedMove, state);
                     }
 
                     break;
                 case MOVE_TYPE_4_LENGTH :
-                    handleMoveType4(move, strippedMove, color, board);
+                    handleMoveType4(move, strippedMove, state);
 
                     break;
             }
 
-            byte capturedPiece = board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'];
+            int capturedPiece = board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'];
             board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'] = board[getChessATOI(move.getFromSquare().charAt(0))][move.getFromSquare().charAt(1) - '1'];
             board[getChessATOI(move.getFromSquare().charAt(0))][move.getFromSquare().charAt(1) - '1'] = EMPTY;
 
@@ -525,15 +525,17 @@ public class PGNParser {
                 }
             }
 
+            int color = state.currentPlayer;
+
             if (move.isPromoted()) {
                 if (move.getPromotion().equals(QUEEN)) {
-                    board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'] = (byte)(BLACK_QUEEN * color);
+                    board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'] = BLACK_QUEEN * color;
                 } else if (move.getPromotion().equals(ROOK)) {
-                    board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'] = (byte)(BLACK_ROOK * color);
+                    board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'] = BLACK_ROOK * color;
                 } else if (move.getPromotion().equals(BISHOP)) {
-                    board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'] = (byte)(BLACK_BISHOP * color);
+                    board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'] = BLACK_BISHOP * color;
                 } else if (move.getPromotion().equals(KNIGHT)) {
-                    board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'] = (byte)(BLACK_KNIGHT * color);
+                    board[getChessATOI(move.getToSquare().charAt(0))][move.getToSquare().charAt(1) - '1'] = BLACK_KNIGHT * color;
                 }
             }
 
@@ -541,11 +543,11 @@ public class PGNParser {
 
     }
 
-    private static void handleMoveType1(PGNMove move, String strippedMove, byte color, byte[][] board) throws PGNParseException {
+    private static void handleMoveType1(PGNMove move, String strippedMove, final PGNParserGameState state) throws PGNParseException {
         int tohPos = getChessATOI(strippedMove.charAt(0));
         int tovPos = strippedMove.charAt(1) - '1';
-        byte piece = (byte)(BLACK_PAWN * color);
-        int fromvPos = getPawnvPos(tohPos, tovPos, piece, board);
+        int piece = BLACK_PAWN * state.currentPlayer;
+        int fromvPos = getPawnvPos(tohPos, tovPos, piece, state.board);
         int fromhPos = tohPos;
 
         if (fromvPos == - 1) {
@@ -556,19 +558,21 @@ public class PGNParser {
         move.setToSquare(getChessCoords(tohPos, tovPos));
     }
 
-    private static void handleMoveType2(PGNMove move, String strippedMove, byte color, byte[][] board) throws PGNParseException {
-        byte piece;
+    private static void handleMoveType2(PGNMove move, String strippedMove, final PGNParserGameState state) throws PGNParseException {
+        int piece;
         int tohPos = getChessATOI(strippedMove.charAt(1));
         int tovPos = strippedMove.charAt(2) - '1';
         int fromvPos = -1;
         int fromhPos = -1;
+        int color = state.currentPlayer;
+        int[][] board = state.board;
 
         if (strippedMove.charAt(0) == PAWN.charAt(0)) {
-            piece = (byte)(BLACK_PAWN * color);
+            piece = BLACK_PAWN * color;
             fromvPos = getPawnvPos(tohPos, tovPos, piece, board);
             fromhPos = tohPos;
         } else if (strippedMove.charAt(0) == KNIGHT.charAt(0)) {
-            piece = (byte)(BLACK_KNIGHT * color);
+            piece = BLACK_KNIGHT * color;
             int[]  fromPos = getSingleMovePiecePos(tohPos, tovPos, piece, board, KNIGHT_SEARCH_PATH);
 
             if (fromPos == null) {
@@ -578,7 +582,7 @@ public class PGNParser {
             fromhPos = fromPos[0];
             fromvPos = fromPos[1];
         } else if (strippedMove.charAt(0) == BISHOP.charAt(0)) {
-            piece = (byte)(BLACK_BISHOP * color);
+            piece = BLACK_BISHOP * color;
             int[] fromPos = getMultiMovePiecePos(tohPos, tovPos, piece, board, BISHOP_SEARCH_PATH);
 
             if (fromPos == null) {
@@ -588,7 +592,7 @@ public class PGNParser {
             fromhPos = fromPos[0];
             fromvPos = fromPos[1];
         } else if (strippedMove.charAt(0) == ROOK.charAt(0)) {
-            piece = (byte)(BLACK_ROOK * color);
+            piece = BLACK_ROOK * color;
             int[] fromPos = getMultiMovePiecePos(tohPos, tovPos, piece, board, ROOK_SEARCH_PATH);
 
             if (fromPos == null) {
@@ -598,7 +602,7 @@ public class PGNParser {
             fromhPos = fromPos[0];
             fromvPos = fromPos[1];
         } else if (strippedMove.charAt(0) == QUEEN.charAt(0)) {
-            piece = (byte)(BLACK_QUEEN * color);
+            piece = BLACK_QUEEN * color;
             int[] fromPos = getMultiMovePiecePos(tohPos, tovPos, piece, board, QUEEN_KING_SEARCH_PATH);
 
             if (fromPos == null) {
@@ -608,7 +612,7 @@ public class PGNParser {
             fromhPos = fromPos[0];
             fromvPos = fromPos[1];
         } else if (strippedMove.charAt(0) == KING.charAt(0)) {
-            piece = (byte)(BLACK_KING * color);
+            piece = BLACK_KING * color;
             int[]  fromPos = getSingleMovePiecePos(tohPos, tovPos, piece, board, QUEEN_KING_SEARCH_PATH);
 
             if (fromPos == null) {
@@ -627,30 +631,32 @@ public class PGNParser {
         move.setToSquare(getChessCoords(tohPos, tovPos));
     }
 
-    private static void handleMoveType3(PGNMove move, String strippedMove, byte color, byte[][] board) throws PGNParseException {
-        byte piece = WHITE_PAWN;
+    private static void handleMoveType3(PGNMove move, String strippedMove, final PGNParserGameState state) throws PGNParseException {
+        int piece = WHITE_PAWN;
         int fromhPos = getChessATOI(strippedMove.charAt(1));
         int tohPos = getChessATOI(strippedMove.charAt(2));
         int tovPos = strippedMove.charAt(3) - '1';
         int fromvPos = -1;
+        int color = state.currentPlayer;
+        int[][] board = state.board;
 
         if (strippedMove.charAt(0) == PAWN.charAt(0)) {
-            piece = (byte)(BLACK_PAWN * color);
+            piece = BLACK_PAWN * color;
             fromvPos = getPawnvPos(fromhPos, tovPos, piece, board);
         } else if (strippedMove.charAt(0) == KNIGHT.charAt(0)) {
-            piece = (byte)(BLACK_KNIGHT * color);
+            piece = BLACK_KNIGHT * color;
             fromvPos = getSingleMovePiecevPos(tohPos, tovPos, fromhPos, piece, board, KNIGHT_SEARCH_PATH);
         } else if (strippedMove.charAt(0) == BISHOP.charAt(0)) {
-            piece = (byte)(BLACK_BISHOP * color);
+            piece = BLACK_BISHOP * color;
             fromvPos = getMultiMovePiecevPos(tohPos, tovPos, fromhPos, piece, board, BISHOP_SEARCH_PATH);
         } else if (strippedMove.charAt(0) == ROOK.charAt(0)) {
-            piece = (byte)(BLACK_ROOK * color);
+            piece = BLACK_ROOK * color;
             fromvPos = getMultiMovePiecevPos(tohPos, tovPos, fromhPos, piece, board, ROOK_SEARCH_PATH);
         } else if (strippedMove.charAt(0) == QUEEN.charAt(0)) {
-            piece = (byte)(BLACK_QUEEN * color);
+            piece = BLACK_QUEEN * color;
             fromvPos = getMultiMovePiecevPos(tohPos, tovPos, fromhPos, piece, board, QUEEN_KING_SEARCH_PATH);
         } else if (strippedMove.charAt(0) == KING.charAt(0)) {
-            piece = (byte)(BLACK_KING * color);
+            piece = BLACK_KING * color;
             fromvPos = getSingleMovePiecevPos(tohPos, tovPos, fromhPos, piece, board, QUEEN_KING_SEARCH_PATH);
         }
 
@@ -662,25 +668,27 @@ public class PGNParser {
         move.setToSquare(getChessCoords(tohPos, tovPos));
     }
 
-    private static void handleMoveType4(PGNMove move, String strippedMove, byte color, byte[][] board) throws PGNParseException {
-        byte piece = WHITE_PAWN;
+    private static void handleMoveType4(PGNMove move, String strippedMove, final PGNParserGameState state) throws PGNParseException {
+        int piece = WHITE_PAWN;
         int fromhPos = getChessATOI(strippedMove.charAt(1));
         int fromvPos = strippedMove.charAt(2) - '1';
         int tohPos = getChessATOI(strippedMove.charAt(3));
         int tovPos = strippedMove.charAt(4) - '1';
+        int color = state.currentPlayer;
+        int[][] board = state.board;
 
         if (strippedMove.charAt(0) == PAWN.charAt(0)) {
-            piece = (byte)(BLACK_PAWN * color);
+            piece = BLACK_PAWN * color;
         } else if (strippedMove.charAt(0) == KNIGHT.charAt(0)) {
-            piece = (byte)(BLACK_KNIGHT * color);
+            piece = BLACK_KNIGHT * color;
         } else if (strippedMove.charAt(0) == BISHOP.charAt(0)) {
-            piece = (byte)(BLACK_BISHOP * color);
+            piece = BLACK_BISHOP * color;
         } else if (strippedMove.charAt(0) == ROOK.charAt(0)) {
-            piece = (byte)(BLACK_ROOK * color);
+            piece = BLACK_ROOK * color;
         } else if (strippedMove.charAt(0) == QUEEN.charAt(0)) {
-            piece = (byte)(BLACK_QUEEN * color);
+            piece = BLACK_QUEEN * color;
         } else if (strippedMove.charAt(0) == KING.charAt(0)) {
-            piece = (byte)(BLACK_KING * color);
+            piece = BLACK_KING * color;
         }
 
         if (fromvPos == - 1 || fromhPos == -1) {
@@ -695,11 +703,13 @@ public class PGNParser {
         move.setToSquare(getChessCoords(tohPos, tovPos));
     }
 
-    private static void handleMoveType5(PGNMove move, String strippedMove, byte color, byte[][] board) throws PGNParseException {
+    private static void handleMoveType5(PGNMove move, String strippedMove, final PGNParserGameState state) throws PGNParseException {
         int fromhPos = getChessATOI(strippedMove.charAt(0));
         int tohPos = getChessATOI(strippedMove.charAt(1));
         int tovPos = strippedMove.charAt(2) - '1';
-        byte piece = (byte)(BLACK_PAWN * color);
+        int color = state.currentPlayer;
+        int[][] board = state.board;
+        int piece = BLACK_PAWN * color;
         int fromvPos = getPawnvPos(fromhPos, tovPos, piece, board);
 
         if (fromvPos == - 1) {
@@ -710,7 +720,7 @@ public class PGNParser {
             if (board[tohPos][tovPos] == EMPTY) {
                 int enPassantvPos = tovPos - (tovPos - fromvPos);
 
-                if (board[tohPos][enPassantvPos] == (byte)(-1 * BLACK_PAWN * color)) {
+                if (board[tohPos][enPassantvPos] == -1 * BLACK_PAWN * color) {
                     move.setEnpassantCapture(true);
                     move.setEnpassantPieceSquare(getChessCoords(tohPos, enPassantvPos));
                 } else {
@@ -723,29 +733,31 @@ public class PGNParser {
         move.setToSquare(getChessCoords(tohPos, tovPos));
     }
 
-    private static void handleMoveType6(PGNMove move, String strippedMove, byte color, byte[][] board) throws PGNParseException {
-        byte piece = WHITE_PAWN;
+    private static void handleMoveType6(PGNMove move, String strippedMove, final PGNParserGameState state) throws PGNParseException {
+        int piece = WHITE_PAWN;
         int fromvPos = strippedMove.charAt(1) - '1';
         int tohPos = getChessATOI(strippedMove.charAt(2));
         int tovPos = strippedMove.charAt(3) - '1';
         int fromhPos = -1;
+        int color = state.currentPlayer;
+        int[][] board = state.board;
 
         if (strippedMove.charAt(0) == PAWN.charAt(0)) {
             throw new PGNParseException("Invalid move: " + move.getFullMove());
         } else if (strippedMove.charAt(0) == KNIGHT.charAt(0)) {
-            piece = (byte)(BLACK_KNIGHT * color);
+            piece = BLACK_KNIGHT * color;
             fromhPos = getSingleMovePiecehPos(tohPos, tovPos, fromvPos, piece, board, KNIGHT_SEARCH_PATH);
         } else if (strippedMove.charAt(0) == BISHOP.charAt(0)) {
-            piece = (byte)(BLACK_BISHOP * color);
+            piece = BLACK_BISHOP * color;
             fromhPos = getMultiMovePiecehPos(tohPos, tovPos, fromvPos, piece, board, BISHOP_SEARCH_PATH);
         } else if (strippedMove.charAt(0) == ROOK.charAt(0)) {
-            piece = (byte)(BLACK_ROOK * color);
+            piece = BLACK_ROOK * color;
             fromhPos = getMultiMovePiecehPos(tohPos, tovPos, fromvPos, piece, board, ROOK_SEARCH_PATH);
         } else if (strippedMove.charAt(0) == QUEEN.charAt(0)) {
-            piece = (byte)(BLACK_QUEEN * color);
+            piece = BLACK_QUEEN * color;
             fromhPos = getMultiMovePiecehPos(tohPos, tovPos, fromvPos, piece, board, QUEEN_KING_SEARCH_PATH);
         } else if (strippedMove.charAt(0) == KING.charAt(0)) {
-            piece = (byte)(BLACK_KING * color);
+            piece = BLACK_KING * color;
             fromhPos = getSingleMovePiecehPos(tohPos, tovPos, fromvPos, piece, board, QUEEN_KING_SEARCH_PATH);
         }
 
@@ -757,14 +769,6 @@ public class PGNParser {
         move.setToSquare(getChessCoords(tohPos, tovPos));
     }
 
-    private static void switchColor(int[] color) {
-        if (color[0] < 0) {
-            color[0] = BLACK;
-        } else {
-            color[0] = WHITE;
-        }
-    }
-
     private static int getChessATOI(char alfa) {
         return alfa - 'a';
     }
@@ -773,7 +777,7 @@ public class PGNParser {
         return (char)('a' + hPos) + "" + (vPos + 1);
     }
 
-    private static int getPawnvPos(int hPos, int vPos, byte piece, byte[][] board) {
+    private static int getPawnvPos(int hPos, int vPos, int piece, int[][] board) {
         if (board[hPos][vPos + piece] == piece) {
             return vPos + piece;
         } else if (board[hPos][vPos + 2 * piece] == piece) {
@@ -783,12 +787,12 @@ public class PGNParser {
         return -1;
     }
 
-    private static int[] getSingleMovePiecePos(int hPos, int vPos, byte piece, byte[][] board, byte[][] moveData) {
+    private static int[] getSingleMovePiecePos(int hPos, int vPos, int piece, int[][] board, int[][] moveData) {
         for (int i = 0; i < moveData.length; i++) {
             try {
                 if (board[hPos + moveData[i][0]][vPos + moveData[i][1]] == piece) {
                     if (Math.abs(piece) != BLACK_KING) {
-                        if (isKingInCheckAfterMove(board, (byte)(piece / Math.abs(piece)), hPos + moveData[i][0], vPos + moveData[i][1], hPos, vPos)) {
+                        if (isKingInCheckAfterMove(board, piece / Math.abs(piece), hPos + moveData[i][0], vPos + moveData[i][1], hPos, vPos)) {
                             continue;
                         }
                     }
@@ -801,12 +805,12 @@ public class PGNParser {
         return null;
     }
 
-    private static int getSingleMovePiecevPos(int hPos, int vPos, int fromhPos, byte piece, byte[][] board, byte[][] moveData) {
+    private static int getSingleMovePiecevPos(int hPos, int vPos, int fromhPos, int piece, int[][] board, int[][] moveData) {
         for (int i = 0; i < moveData.length; i++) {
             try {
                 if (board[hPos + moveData[i][0]][vPos + moveData[i][1]] == piece && hPos + moveData[i][0] == fromhPos) {
                     if (Math.abs(piece) != BLACK_KING) {
-                        if (isKingInCheckAfterMove(board, (byte)(piece / Math.abs(piece)), fromhPos, vPos + moveData[i][1], hPos, vPos)) {
+                        if (isKingInCheckAfterMove(board, piece / Math.abs(piece), fromhPos, vPos + moveData[i][1], hPos, vPos)) {
                             continue;
                         }
                     }
@@ -819,12 +823,12 @@ public class PGNParser {
         return -1;
     }
 
-    private static int getSingleMovePiecehPos(int hPos, int vPos, int fromvPos, byte piece, byte[][] board, byte[][] moveData) {
+    private static int getSingleMovePiecehPos(int hPos, int vPos, int fromvPos, int piece, int[][] board, int[][] moveData) {
         for (int i = 0; i < moveData.length; i++) {
             try {
                 if (board[hPos + moveData[i][0]][vPos + moveData[i][1]] == piece && vPos + moveData[i][1] == fromvPos) {
                     if (Math.abs(piece) != BLACK_KING) {
-                        if (isKingInCheckAfterMove(board, (byte)(piece / Math.abs(piece)), hPos + moveData[i][0], vPos + moveData[i][1], hPos, vPos)) {
+                        if (isKingInCheckAfterMove(board, piece / Math.abs(piece), hPos + moveData[i][0], vPos + moveData[i][1], hPos, vPos)) {
                             continue;
                         }
                     }
@@ -837,7 +841,7 @@ public class PGNParser {
         return -1;
     }
 
-    private static int[] getMultiMovePiecePos(int hPos, int vPos, byte piece, byte[][] board, byte[][] moveData) {
+    private static int[] getMultiMovePiecePos(int hPos, int vPos, int piece, int[][] board, int[][] moveData) {
         for (int i = 0; i < moveData.length; i++) {
             int[] position = getMultiMovePiecePosRec(hPos, vPos, hPos, vPos, moveData[i][0], moveData[i][1], piece, board);
 
@@ -849,14 +853,14 @@ public class PGNParser {
         return null;
     }
 
-    private static int[] getMultiMovePiecePosRec(int originalhPos, int originalvPos, int hPos, int vPos, int hAdd, int vAdd, byte piece, byte[][] board) {
+    private static int[] getMultiMovePiecePosRec(int originalhPos, int originalvPos, int hPos, int vPos, int hAdd, int vAdd, int piece, int[][] board) {
         hPos += hAdd;
         vPos += vAdd;
 
         try {
             if (board[hPos][vPos] == piece) {
                 if (Math.abs(piece) != BLACK_KING) {
-                    if (isKingInCheckAfterMove(board, (byte)(piece / Math.abs(piece)), hPos, vPos, originalhPos, originalvPos)) {
+                    if (isKingInCheckAfterMove(board, piece / Math.abs(piece), hPos, vPos, originalhPos, originalvPos)) {
                         return null;
                     }
                 }
@@ -872,7 +876,7 @@ public class PGNParser {
         return getMultiMovePiecePosRec(originalhPos, originalvPos, hPos, vPos, hAdd, vAdd, piece, board);
     }
 
-    private static int getMultiMovePiecevPos(int hPos, int vPos, int fromhPos, byte piece, byte[][] board, byte[][] moveData) {
+    private static int getMultiMovePiecevPos(int hPos, int vPos, int fromhPos, int piece, int[][] board, int[][] moveData) {
         for (int i = 0; i < moveData.length; i++) {
             int fromvPos = getMultiMovePiecevPosRec(hPos, vPos, hPos, vPos, moveData[i][0], moveData[i][1], fromhPos, piece, board);
 
@@ -884,14 +888,14 @@ public class PGNParser {
         return -1;
     }
 
-    private static int getMultiMovePiecevPosRec(int originalhPos, int originalvPos, int hPos, int vPos, int hAdd, int vAdd, int fromhPos, byte piece, byte[][] board) {
+    private static int getMultiMovePiecevPosRec(int originalhPos, int originalvPos, int hPos, int vPos, int hAdd, int vAdd, int fromhPos, int piece, int[][] board) {
         hPos += hAdd;
         vPos += vAdd;
 
         try {
             if (board[hPos][vPos] == piece && hPos == fromhPos) {
                 if (Math.abs(piece) != BLACK_KING) {
-                    if (isKingInCheckAfterMove(board, (byte)(piece / Math.abs(piece)), hPos, vPos, originalhPos, originalvPos)) {
+                    if (isKingInCheckAfterMove(board, piece / Math.abs(piece), hPos, vPos, originalhPos, originalvPos)) {
                         return -1;
                     }
                 }
@@ -907,7 +911,7 @@ public class PGNParser {
         return getMultiMovePiecevPosRec(originalhPos, originalvPos, hPos, vPos, hAdd, vAdd, fromhPos, piece, board);
     }
 
-    private static int getMultiMovePiecehPos(int hPos, int vPos, int fromvPos, byte piece, byte[][] board, byte[][] moveData) {
+    private static int getMultiMovePiecehPos(int hPos, int vPos, int fromvPos, int piece, int[][] board, int[][] moveData) {
         for (int i = 0; i < moveData.length; i++) {
             int fromhPos = getMultiMovePiecehPosRec(hPos, vPos, hPos, vPos, moveData[i][0], moveData[i][1], fromvPos, piece, board);
 
@@ -919,14 +923,14 @@ public class PGNParser {
         return -1;
     }
 
-    private static int getMultiMovePiecehPosRec(int originalhPos, int originalvPos, int hPos, int vPos, int hAdd, int vAdd, int fromvPos, byte piece, byte[][] board) {
+    private static int getMultiMovePiecehPosRec(int originalhPos, int originalvPos, int hPos, int vPos, int hAdd, int vAdd, int fromvPos, int piece, int[][] board) {
         hPos += hAdd;
         vPos += vAdd;
 
         try {
             if (board[hPos][vPos] == piece && vPos == fromvPos) {
                 if (Math.abs(piece) != BLACK_KING) {
-                    if (isKingInCheckAfterMove(board, (byte)(piece / Math.abs(piece)), hPos, vPos, originalhPos, originalvPos)) {
+                    if (isKingInCheckAfterMove(board, piece / Math.abs(piece), hPos, vPos, originalhPos, originalvPos)) {
                         return -1;
                     }
                 }
@@ -962,9 +966,9 @@ public class PGNParser {
         return false;
     }
 
-    private static boolean isKingInCheckAfterMove(byte[][] board, byte color, int hPos, int vPos, int tohPos, int tovPos) {
+    private static boolean isKingInCheckAfterMove(int[][] board, int color, int hPos, int vPos, int tohPos, int tovPos) {
         try {
-            byte king = (byte)(BLACK_KING * color);
+            int king = BLACK_KING * color;
             int kinghPos = -1;
             int kingvPos = -1;
 
@@ -984,7 +988,7 @@ public class PGNParser {
                 return false;
             }
 
-            byte piece = (byte)(-1 * color * BLACK_BISHOP);
+            int piece = -1 * color * BLACK_BISHOP;
 
             for (int i = 0; i < BISHOP_SEARCH_PATH.length; i++) {
                 if (isKingInCheckAfterMoveRec(board, piece, kinghPos, kingvPos, hPos, vPos, tohPos, tovPos, BISHOP_SEARCH_PATH[i][0], BISHOP_SEARCH_PATH[i][1])) {
@@ -992,7 +996,7 @@ public class PGNParser {
                 }
             }
 
-            piece = (byte)(-1 * color * BLACK_ROOK);
+            piece = -1 * color * BLACK_ROOK;
 
             for (int i = 0; i < ROOK_SEARCH_PATH.length; i++) {
                 if (isKingInCheckAfterMoveRec(board, piece, kinghPos, kingvPos, hPos, vPos, tohPos, tovPos, ROOK_SEARCH_PATH[i][0], ROOK_SEARCH_PATH[i][1])) {
@@ -1000,7 +1004,7 @@ public class PGNParser {
                 }
             }
 
-            piece = (byte)(-1 * color * BLACK_QUEEN);
+            piece = -1 * color * BLACK_QUEEN;
 
             for (int i = 0; i < QUEEN_KING_SEARCH_PATH.length; i++) {
                 if (isKingInCheckAfterMoveRec(board, piece, kinghPos, kingvPos, hPos, vPos, tohPos, tovPos, QUEEN_KING_SEARCH_PATH[i][0], QUEEN_KING_SEARCH_PATH[i][1])) {
@@ -1014,7 +1018,7 @@ public class PGNParser {
 
     }
 
-    private static boolean isKingInCheckAfterMoveRec(byte[][] board, byte piece, int hPos, int vPos, int skiphPos, int skipvPos, int tohPos, int tovPos, int hAdd, int vAdd) {
+    private static boolean isKingInCheckAfterMoveRec(int[][] board, int piece, int hPos, int vPos, int skiphPos, int skipvPos, int tohPos, int tovPos, int hAdd, int vAdd) {
         hPos += hAdd;
         vPos += vAdd;
 
@@ -1029,8 +1033,10 @@ public class PGNParser {
         return board[hPos][vPos] == piece;
     }
 
-    private static byte[][] createDefaultBoard() {
-        return new byte[][] {
+    private static PGNParserGameState createDefaultGameState() {
+        PGNParserGameState state = new PGNParserGameState();
+
+        state.board = new int[][] {
                 { WHITE_ROOK, WHITE_PAWN, EMPTY, EMPTY, EMPTY, EMPTY, BLACK_PAWN, BLACK_ROOK, },
                 { WHITE_KNIGHT, WHITE_PAWN, EMPTY, EMPTY, EMPTY, EMPTY, BLACK_PAWN, BLACK_KNIGHT, },
                 { WHITE_BISHOP, WHITE_PAWN, EMPTY, EMPTY, EMPTY, EMPTY, BLACK_PAWN, BLACK_BISHOP, },
@@ -1040,27 +1046,126 @@ public class PGNParser {
                 { WHITE_KNIGHT, WHITE_PAWN, EMPTY, EMPTY, EMPTY, EMPTY, BLACK_PAWN, BLACK_KNIGHT, },
                 { WHITE_ROOK, WHITE_PAWN, EMPTY, EMPTY, EMPTY, EMPTY, BLACK_PAWN, BLACK_ROOK, },
         };
+
+        state.currentPlayer = WHITE;
+
+        return state;
     }
 
-    private static String getFEN(byte[][] board) {
-        return null;
-    }
+    private static PGNParserGameState createGameState(String fen) throws PGNParseException {
+        String[] tokens = fen.split("\\s+|/");
 
-    private static byte[][] createBoard(String fen) {
-        return null;
-    }
-
-    private static byte[][] cloneBoard(byte[][] board) {
-        byte[][] newBoard = new byte[board.length][];
-
-        for(int i = 0; i < board.length; i++) {
-            newBoard[i] = board[i].clone();
+        if (tokens.length != 13) {
+            throw new PGNParseException("Invalid FEN position: " + fen);
         }
 
-        return newBoard;
+        PGNParserGameState state = new PGNParserGameState();
+        int[][] board = new int[8][8];
+
+        for (int i = 0; i < 8; i++) {
+            Arrays.fill(board[i], EMPTY);
+        }
+
+        for (int i = 7; i >= 0; i--) {
+            String line = tokens[i];
+
+            for (int j = 0; j < line.length(); j++) {
+                char ch = line.charAt(j);
+
+                if (ch >= '1' && ch <= '8') {
+                    j += ch - '1';
+                    continue;
+                }
+
+                int color = WHITE;
+
+                if (ch >= 'a' && ch <= 'z') {
+                    color *= -1;
+                }
+
+                int piece = pieceToInt(String.valueOf(ch).toUpperCase(), color);
+
+                if (piece == EMPTY) {
+                    throw new PGNParseException(ch + "Invalid FEN position: " + fen);
+                }
+
+                board[i][j] = piece;
+            }
+        }
+
+        state.board = board;
+        state.currentPlayer = tokens[8].charAt(0) == 'w' ? WHITE : BLACK;
+
+        String castlingToken = tokens[9];
+        state.whiteKingCastleAvailable = false;
+        state.whiteQueenCastleAvailable = false;
+        state.blackKingCastleAvailable = false;
+        state.blackQueenCastleAvailable = false;
+
+        for (int i = 0; i < castlingToken.length(); i++) {
+            if (castlingToken.charAt(i) == '-') {
+                if (castlingToken.length() != 1) {
+                    throw new PGNParseException("Invalid FEN position: " + fen);
+                }
+
+                break;
+            } else if (castlingToken.charAt(i) == 'K') {
+                state.whiteKingCastleAvailable = true;
+            } else if (castlingToken.charAt(i) == 'Q') {
+                state.whiteQueenCastleAvailable = true;
+            } else if (castlingToken.charAt(i) == 'k') {
+                state.blackKingCastleAvailable = true;
+            } else if (castlingToken.charAt(i) == 'q') {
+                state.blackQueenCastleAvailable = true;
+            }
+        }
+
+        String enpassentToken = tokens[10];
+
+        if (enpassentToken.length() == 2) {
+            if (enpassentToken.charAt(0) >= 'a' && enpassentToken.charAt(0) <= 'h' &&
+                    enpassentToken.charAt(1) >= '1' && enpassentToken.charAt(1) <= '8') {
+                if (state.currentPlayer == WHITE) {
+                    state.blackEnpassantSquare[0] = enpassentToken.charAt(0) - 'a';
+                    state.blackEnpassantSquare[1] = enpassentToken.charAt(1) - '1';
+                } else {
+                    state.whiteEnpassantSquare[0] = enpassentToken.charAt(0) - 'a';
+                    state.whiteEnpassantSquare[1] = enpassentToken.charAt(1) - '1';
+                }
+            } else {
+                throw new PGNParseException("Invalid FEN position: " + fen);
+            }
+        } else {
+            if (!enpassentToken.equals("-")) {
+                throw new PGNParseException("Invalid FEN position: " + fen);
+            }
+        }
+
+        try {
+            int halfMoves = Integer.parseInt(tokens[11]);
+            state.halfMovesCount = halfMoves;
+        } catch (NumberFormatException e) {
+            throw new PGNParseException("Invalid FEN position: " + fen);
+        }
+
+        try {
+            int fullMoves = Integer.parseInt(tokens[12]);
+            state.fullMovesCount = fullMoves;
+        } catch (NumberFormatException e) {
+            throw new PGNParseException("Invalid FEN position: " + fen);
+        }
+
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                System.out.print(board[i][j]);
+            }
+            System.out.println();
+        }
+
+        return state;
     }
 
-    private static byte pieceToByte(String piece, int color) {
+    private static int pieceToInt(String piece, int color) {
 
         int p = EMPTY;
 
@@ -1078,7 +1183,7 @@ public class PGNParser {
             p = BLACK_KING * color;
         }
 
-        return (byte)p;
+        return (int)p;
     }
 
 }
