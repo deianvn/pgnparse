@@ -29,9 +29,7 @@ class PGNParserGameState {
 
     boolean blackQueenCastleAvailable = true;
 
-    int[] whiteEnpassantSquare;
-
-    int[] blackEnpassantSquare;
+    int[] enpassantSquare;
 
     int halfMovesCount;
 
@@ -52,19 +50,13 @@ class PGNParserGameState {
         gameState.whiteQueenCastleAvailable = whiteQueenCastleAvailable;
         gameState.blackKingCastleAvailable = blackKingCastleAvailable;
         gameState.blackQueenCastleAvailable = blackQueenCastleAvailable;
-        gameState.whiteEnpassantSquare = whiteEnpassantSquare;
-        gameState.blackEnpassantSquare = blackEnpassantSquare;
+        gameState.enpassantSquare = enpassantSquare;
 
         return gameState;
     }
 
     void switchPlayer() {
-        if (currentPlayer == PGNParser.W && blackEnpassantSquare != null) {
-            blackEnpassantSquare = null;
-        } else if (currentPlayer == PGNParser.B && whiteEnpassantSquare != null) {
-            whiteEnpassantSquare = null;
-        }
-
+        enpassantSquare = null;
         currentPlayer *= -1;
     }
 }

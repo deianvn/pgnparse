@@ -403,8 +403,10 @@ public class PGNParser implements PGN {
             move = parseMove(token);
 
             if (validateMove(move)) {
-
-                if (state.currentPlayer == W) {
+                if (move.isEndGameMarked()) {
+                    move.setColor(NONE);
+                    move.setColor(NONE);
+                } else if (state.currentPlayer == W) {
                     move.setColor(WHITE);
                 } else {
                     move.setColor(BLACK);
@@ -1041,109 +1043,51 @@ public class PGNParser implements PGN {
     }
 
     private static PGNParserGameState createGameState(String fen) throws PGNParseException {
-        String[] tokens = fen.split("\\s+|/");
-
-        if (tokens.length != 13) {
-            throw new PGNParseException("Invalid FEN position: " + fen);
-        }
-
+        FENPosition position = FENParser.parse(fen);
         PGNParserGameState state = new PGNParserGameState();
         int[][] board = new int[8][8];
 
         for (int i = 0; i < 8; i++) {
-            Arrays.fill(board[i], EMPTY);
+            for (int j = 0; j < 8; j++) {
+                board[i][j] = EMPTY;
+            }
         }
 
-        for (int i = 0; i < 8; i++) {
-            String line = tokens[i];
-
-            for (int j = 0; j < line.length(); j++) {
-                char ch = line.charAt(j);
-
-                if (ch >= '1' && ch <= '8') {
-                    j += ch - '1';
-                    continue;
-                }
-
-                int color = W;
-
-                if (ch >= 'a' && ch <= 'z') {
-                    color *= -1;
-                }
-
-                int piece = pieceToInt(String.valueOf(ch).toUpperCase(), color);
-
-                if (piece == EMPTY) {
-                    throw new PGNParseException(ch + "Invalid FEN position: " + fen);
-                }
-
-                board[j][7 - i] = piece;
-            }
+        for (String square : position.getOccupiedSquares()) {
+            int[] coor = squareToCoordinates(square);
+            Piece piece = position.getPiece(square);
+            board[coor[0]][coor[1]] = pieceToInt(piece.getType(), colorToInt(piece.getColor()));
         }
 
         state.board = board;
-        state.currentPlayer = tokens[8].charAt(0) == 'w' ? W : B;
+        state.fullMovesCount = position.getFullMoves();
+        state.halfMovesCount = position.getHalfMoves();
 
-        String castlingToken = tokens[9];
-        state.whiteKingCastleAvailable = false;
-        state.whiteQueenCastleAvailable = false;
-        state.blackKingCastleAvailable = false;
-        state.blackQueenCastleAvailable = false;
+        String enpassantSquare = position.getEnpassantSquare();
 
-        for (int i = 0; i < castlingToken.length(); i++) {
-            if (castlingToken.charAt(i) == '-') {
-                if (castlingToken.length() != 1) {
-                    throw new PGNParseException("Invalid FEN position: " + fen);
-                }
-
-                break;
-            } else if (castlingToken.charAt(i) == 'K') {
-                state.whiteKingCastleAvailable = true;
-            } else if (castlingToken.charAt(i) == 'Q') {
-                state.whiteQueenCastleAvailable = true;
-            } else if (castlingToken.charAt(i) == 'k') {
-                state.blackKingCastleAvailable = true;
-            } else if (castlingToken.charAt(i) == 'q') {
-                state.blackQueenCastleAvailable = true;
-            }
+        if (enpassantSquare != null) {
+            state.enpassantSquare = squareToCoordinates(enpassantSquare);
         }
 
-        String enpassentToken = tokens[10];
-
-        if (enpassentToken.length() == 2) {
-            if (enpassentToken.charAt(0) >= 'a' && enpassentToken.charAt(0) <= 'h' &&
-                    enpassentToken.charAt(1) >= '1' && enpassentToken.charAt(1) <= '8') {
-                if (state.currentPlayer == W) {
-                    state.blackEnpassantSquare[0] = enpassentToken.charAt(0) - 'a';
-                    state.blackEnpassantSquare[1] = enpassentToken.charAt(1) - '1';
-                } else {
-                    state.whiteEnpassantSquare[0] = enpassentToken.charAt(0) - 'a';
-                    state.whiteEnpassantSquare[1] = enpassentToken.charAt(1) - '1';
-                }
-            } else {
-                throw new PGNParseException("Invalid FEN position: " + fen);
-            }
-        } else {
-            if (!enpassentToken.equals("-")) {
-                throw new PGNParseException("Invalid FEN position: " + fen);
-            }
-        }
-
-        try {
-            int halfMoves = Integer.parseInt(tokens[11]);
-            state.halfMovesCount = halfMoves;
-        } catch (NumberFormatException e) {
-            throw new PGNParseException("Invalid FEN position: " + fen);
-        }
-
-        try {
-            int fullMoves = Integer.parseInt(tokens[12]);
-            state.fullMovesCount = fullMoves;
-        } catch (NumberFormatException e) {
-            throw new PGNParseException("Invalid FEN position: " + fen);
-        }
+        state.whiteKingCastleAvailable = position.isWhiteKingCastleAvailable();
+        state.whiteQueenCastleAvailable = position.isWhiteQueenCastleAvailable();
+        state.blackKingCastleAvailable = position.isBlackKingCastleAvailable();
+        state.blackQueenCastleAvailable = position.isBlackQueenCastleAvailable();
+        state.currentPlayer = colorToInt(position.getPlayerToMove());
 
         return state;
+    }
+
+    private static int[] squareToCoordinates(String square) {
+        return new int[] { square.charAt(0) - 'a', square.charAt(1) - '1' };
+    }
+
+    private static int colorToInt(String color) {
+        if (color.equals("w")) {
+            return W;
+        }
+
+        return B;
     }
 
     private static int pieceToInt(String piece, int color) {

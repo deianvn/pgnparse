@@ -78,17 +78,21 @@ public class PGNParseExample {
 				System.out.println(tab + ((num + 1) / 2) + ". ");
 			}
 
-            System.out.print(tab + "\t " + move.getColor() + ": ");
+            System.out.print(tab + "\t ");
 
             if (move.isEndGameMarked()) {
 				System.out.print("Result: " + move.getMove());
-			} else if (move.isKingSideCastle()) {
-				System.out.print("[O-O]\t");
-			} else if (move.isQueenSideCastle()) {
-				System.out.print("[O-O-O]\t");
 			} else {
-				System.out.print("[" + move.getFromSquare() + "]->[" + move.getToSquare() + "]\t");
-			}
+                System.out.print(move.getColor() + ": ");
+
+                if (move.isKingSideCastle()) {
+                    System.out.print("[O-O]\t");
+                } else if (move.isQueenSideCastle()) {
+                    System.out.print("[O-O-O]\t");
+                } else {
+                    System.out.print("[" + move.getFromSquare() + "]->[" + move.getToSquare() + "]\t");
+                }
+            }
 
 			if (move.getComment().length() > 0) {
 				System.out.print("// " + move.getComment());

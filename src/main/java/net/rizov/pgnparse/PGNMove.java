@@ -68,7 +68,7 @@ public class PGNMove {
         return move;
     }
 
-    void setMove(String move) {
+    public void setMove(String move) {
         this.move = move;
     }
 
@@ -76,7 +76,7 @@ public class PGNMove {
         return fullMove;
     }
 
-    void setFullMove(String fullMove) {
+    public void setFullMove(String fullMove) {
         this.fullMove = fullMove;
     }
 
@@ -84,7 +84,7 @@ public class PGNMove {
         return fromSquare;
     }
 
-    void setFromSquare(String fromSquare) {
+    public void setFromSquare(String fromSquare) {
         this.fromSquare = fromSquare;
     }
 
@@ -92,7 +92,7 @@ public class PGNMove {
         return toSquare;
     }
 
-    void setToSquare(String toSquare) {
+    public void setToSquare(String toSquare) {
         this.toSquare = toSquare;
     }
 
@@ -100,7 +100,7 @@ public class PGNMove {
         return piece;
     }
 
-    void setPiece(String piece) {
+    public void setPiece(String piece) {
         this.piece = piece;
     }
 
@@ -108,7 +108,7 @@ public class PGNMove {
         return color;
     }
 
-    void setColor(String color) {
+    public void setColor(String color) {
         this.color = color;
     }
 
@@ -124,7 +124,7 @@ public class PGNMove {
         return comment;
     }
 
-    void setComment(String comment) {
+    public void setComment(String comment) {
         this.comment = comment;
     }
 
@@ -132,7 +132,7 @@ public class PGNMove {
         return checked;
     }
 
-    void setChecked(boolean checked) {
+    public void setChecked(boolean checked) {
         this.checked = checked;
     }
 
@@ -140,7 +140,7 @@ public class PGNMove {
         return checkMated;
     }
 
-    void setCheckMated(boolean checkMated) {
+    public void setCheckMated(boolean checkMated) {
         this.checkMated = checkMated;
     }
 
@@ -148,7 +148,7 @@ public class PGNMove {
         return captured;
     }
 
-    void setCaptured(boolean captured) {
+    public void setCaptured(boolean captured) {
         this.captured = captured;
     }
 
@@ -156,7 +156,7 @@ public class PGNMove {
         return promoted;
     }
 
-    void setPromoted(boolean promoted) {
+    public void setPromoted(boolean promoted) {
         this.promoted = promoted;
     }
 
@@ -164,7 +164,7 @@ public class PGNMove {
         return promotion;
     }
 
-    void setPromotion(String promotion) {
+    public void setPromotion(String promotion) {
         this.promotion = promotion;
     }
 
@@ -172,7 +172,7 @@ public class PGNMove {
         return endGameMarked;
     }
 
-    void setEndGameMarked(boolean endGameMarked) {
+    public void setEndGameMarked(boolean endGameMarked) {
         this.endGameMarked = endGameMarked;
     }
 
@@ -180,7 +180,7 @@ public class PGNMove {
         return endGameMark;
     }
 
-    void setEndGameMark(String endGameMark) {
+    public void setEndGameMark(String endGameMark) {
         this.endGameMark = endGameMark;
     }
 
@@ -188,7 +188,7 @@ public class PGNMove {
         return kingSideCastle;
     }
 
-    void setKingSideCastle(boolean kingSideCastle) {
+    public void setKingSideCastle(boolean kingSideCastle) {
         this.kingSideCastle = kingSideCastle;
     }
 
@@ -196,7 +196,7 @@ public class PGNMove {
         return queenSideCastle;
     }
 
-    void setQueenSideCastle(boolean queenSideCastle) {
+    public void setQueenSideCastle(boolean queenSideCastle) {
         this.queenSideCastle = queenSideCastle;
     }
 
@@ -204,7 +204,7 @@ public class PGNMove {
         return enpassant;
     }
 
-    void setEnpassant(boolean enpassant) {
+    public void setEnpassant(boolean enpassant) {
         this.enpassant = enpassant;
     }
 
@@ -212,7 +212,7 @@ public class PGNMove {
         return enpassantCapture;
     }
 
-    void setEnpassantCapture(boolean enpassantCapture) {
+    public void setEnpassantCapture(boolean enpassantCapture) {
         this.enpassantCapture = enpassantCapture;
     }
 
@@ -220,7 +220,7 @@ public class PGNMove {
         return enpassantPieceSquare;
     }
 
-    void setEnpassantPieceSquare(String enpassantPieceSquare) {
+    public void setEnpassantPieceSquare(String enpassantPieceSquare) {
         this.enpassantPieceSquare = enpassantPieceSquare;
     }
 
@@ -228,7 +228,7 @@ public class PGNMove {
         return isKingSideCastle() || isQueenSideCastle();
     }
 
-    void addVariation(PGNVariation variation) {
+    public void addVariation(PGNVariation variation) {
         if (variations == null) {
             variations = new ArrayList<PGNVariation>();
         }

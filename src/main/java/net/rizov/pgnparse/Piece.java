@@ -15,24 +15,25 @@
  */
 package net.rizov.pgnparse;
 
-public interface PGN {
+public class Piece {
 
-    String PAWN = "P";
+    private String type;
 
-    String KNIGHT = "N";
+    private String color;
 
-    String BISHOP = "B";
+    public String getType() {
+        return type;
+    }
 
-    String ROOK = "R";
+    public void setType(String type) {
+        this.type = type;
+    }
 
-    String QUEEN = "Q";
+    public String getColor() {
+        return color;
+    }
 
-    String KING = "K";
-
-    String WHITE = "w";
-
-    String BLACK = "b";
-
-    String NONE = "-";
-
+    public void setColor(String color) {
+        this.color = color;
+    }
 }
