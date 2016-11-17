@@ -59,9 +59,9 @@ class PGNParserGameState {
     }
 
     void switchPlayer() {
-        if (currentPlayer == PGNParser.WHITE && blackEnpassantSquare != null) {
+        if (currentPlayer == PGNParser.W && blackEnpassantSquare != null) {
             blackEnpassantSquare = null;
-        } else if (currentPlayer == PGNParser.BLACK && whiteEnpassantSquare != null) {
+        } else if (currentPlayer == PGNParser.B && whiteEnpassantSquare != null) {
             whiteEnpassantSquare = null;
         }
 

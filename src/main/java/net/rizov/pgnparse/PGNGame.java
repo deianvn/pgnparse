@@ -24,39 +24,9 @@ public class PGNGame extends PGNMoveContainer {
 
 	private Map<String, String> tags;
 	
-	private String pgn;
-
-	private int startPositionHalfMovesCount;
-
-	private int startPositionFullMovesCount;
-	
-	PGNGame(String pgn) {
+	PGNGame() {
 		super();
-		this.pgn = pgn;
 		tags = new HashMap<String, String>();
-        startPositionHalfMovesCount = 0;
-        startPositionFullMovesCount = 0;
-	}
-	
-	@Override
-	public String toString() {
-		return pgn == null ? "" : pgn;
-	}
-
-	void setStartPositionFullMovesCount(int startPositionFullMovesCount) {
-		this.startPositionFullMovesCount = startPositionFullMovesCount;
-	}
-
-	public int getStartPositionHalfMovesCount() {
-		return startPositionHalfMovesCount;
-	}
-
-	void setStartPositionHalfMovesCount(int startPositionHalfMovesCount) {
-		this.startPositionHalfMovesCount = startPositionHalfMovesCount;
-	}
-
-	public int getStartPositionFullMovesCount() {
-		return startPositionFullMovesCount;
 	}
 
 	void addTag(String key, String value) {

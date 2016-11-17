@@ -32,7 +32,7 @@ public class PGNMove {
 	
 	private String piece;
 	
-	private Color color;
+	private String color;
 
     private String capturedPiece;
 	
@@ -104,11 +104,11 @@ public class PGNMove {
         this.piece = piece;
     }
 
-    public Color getColor() {
+    public String getColor() {
         return color;
     }
 
-    void setColor(Color color) {
+    void setColor(String color) {
         this.color = color;
     }
 

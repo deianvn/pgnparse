@@ -78,7 +78,7 @@ public class PGNParseExample {
 				System.out.println(tab + ((num + 1) / 2) + ". ");
 			}
 
-            System.out.print(tab + "\t");
+            System.out.print(tab + "\t " + move.getColor() + ": ");
 
             if (move.isEndGameMarked()) {
 				System.out.print("Result: " + move.getMove());
@@ -92,16 +92,16 @@ public class PGNParseExample {
 
 			if (move.getComment().length() > 0) {
 				System.out.print("// " + move.getComment());
-			} else {
-                System.out.println();
-            }
+			}
+
+			System.out.println();
 
 			if (move.hasVariations()) {
                 if (isPairStart) {
                     System.out.println();
                 }
 
-                printVariations(move, num++, tab);
+                printVariations(move, num, tab);
             }
 
             num++;

@@ -1,3 +1,5 @@
+package net.rizov.pgnparse;
+
 /*
  * Copyright 2016 Deyan Rizov
  *
@@ -13,6 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.rizov.pgnparse;
+public interface PGN {
 
-public enum Color {	white, black }
+    String PAWN = "P";
+
+    String KNIGHT = "N";
+
+    String BISHOP = "B";
+
+    String ROOK = "R";
+
+    String QUEEN = "Q";
+
+    String KING = "K";
+
+    String WHITE = "w";
+
+    String BLACK = "b";
+
+}

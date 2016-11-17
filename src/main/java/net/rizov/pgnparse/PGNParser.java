@@ -22,19 +22,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-public class PGNParser {
-
-    static final String PAWN = "P";
-
-    static final String KNIGHT = "N";
-
-    static final String BISHOP = "B";
-
-    static final String ROOK = "R";
-
-    static final String QUEEN = "Q";
-
-    static final String KING = "K";
+public class PGNParser implements PGN {
 
     private static final String MOVE_TYPE_1_RE = "[a-h][1-8]";
 
@@ -56,9 +44,9 @@ public class PGNParser {
 
     private static final String MOVE_TYPE_6_RE = "[" + PAWN + KNIGHT + BISHOP + ROOK + QUEEN + KING + "][1-8][a-h][1-8]";
 
-    static final int WHITE = -1;
+    static final int W = -1;
 
-    static final int BLACK = 1;
+    static final int B = 1;
 
     private static final int WHITE_PAWN = -1;
 
@@ -95,7 +83,7 @@ public class PGNParser {
     private static final int[][] QUEEN_KING_SEARCH_PATH = { {1, 1}, {1, -1}, {-1, -1}, {-1, 1}, {0, 1}, {1, 0}, {0, -1}, {-1, 0} };
 
     public static PGNGame parsePGNGame(String pgnGame) throws PGNParseException {
-        final PGNGame game = new PGNGame(pgnGame);
+        final PGNGame game = new PGNGame();
 
         BufferedReader br = new BufferedReader(new StringReader(pgnGame));
         String line;
@@ -254,7 +242,7 @@ public class PGNParser {
         if (move.isCastle()) {
             if (move.isKingSideCastle()) {
 
-                if (move.getColor() == Color.white) {
+                if (WHITE.equals(move.getColor())) {
                     board[4][0] = board[6][0];
                     board[7][0] = board[5][0];
                     board[6][0] = EMPTY;
@@ -267,7 +255,7 @@ public class PGNParser {
                 }
             } else {
 
-                if (move.getColor() == Color.white) {
+                if (WHITE.equals(move.getColor())) {
                     board[4][0] = board[2][0];
                     board[0][0] = board[3][0];
                     board[2][0] = EMPTY;
@@ -416,10 +404,10 @@ public class PGNParser {
 
             if (validateMove(move)) {
 
-                if (state.currentPlayer == WHITE) {
-                    move.setColor(Color.white);
+                if (state.currentPlayer == W) {
+                    move.setColor(WHITE);
                 } else {
-                    move.setColor(Color.black);
+                    move.setColor(BLACK);
                 }
 
                 container.addMove(move);
@@ -438,7 +426,7 @@ public class PGNParser {
         if (move.isCastle()) {
             if (move.isKingSideCastle()) {
 
-                if (move.getColor() == Color.white) {
+                if (WHITE.equals(move.getColor())) {
                     board[6][0] = board[4][0];
                     board[5][0] = board[7][0];
                     board[4][0] = EMPTY;
@@ -451,7 +439,7 @@ public class PGNParser {
                 }
             } else {
 
-                if (move.getColor() == Color.white) {
+                if (WHITE.equals(move.getColor())) {
                     board[2][0] = board[4][0];
                     board[3][0] = board[0][0];
                     board[4][0] = EMPTY;
@@ -1047,7 +1035,7 @@ public class PGNParser {
                 { WHITE_ROOK, WHITE_PAWN, EMPTY, EMPTY, EMPTY, EMPTY, BLACK_PAWN, BLACK_ROOK, },
         };
 
-        state.currentPlayer = WHITE;
+        state.currentPlayer = W;
 
         return state;
     }
@@ -1077,7 +1065,7 @@ public class PGNParser {
                     continue;
                 }
 
-                int color = WHITE;
+                int color = W;
 
                 if (ch >= 'a' && ch <= 'z') {
                     color *= -1;
@@ -1094,7 +1082,7 @@ public class PGNParser {
         }
 
         state.board = board;
-        state.currentPlayer = tokens[8].charAt(0) == 'w' ? WHITE : BLACK;
+        state.currentPlayer = tokens[8].charAt(0) == 'w' ? W : B;
 
         String castlingToken = tokens[9];
         state.whiteKingCastleAvailable = false;
@@ -1125,7 +1113,7 @@ public class PGNParser {
         if (enpassentToken.length() == 2) {
             if (enpassentToken.charAt(0) >= 'a' && enpassentToken.charAt(0) <= 'h' &&
                     enpassentToken.charAt(1) >= '1' && enpassentToken.charAt(1) <= '8') {
-                if (state.currentPlayer == WHITE) {
+                if (state.currentPlayer == W) {
                     state.blackEnpassantSquare[0] = enpassentToken.charAt(0) - 'a';
                     state.blackEnpassantSquare[1] = enpassentToken.charAt(1) - '1';
                 } else {
