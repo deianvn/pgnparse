@@ -58,6 +58,10 @@ public class PGNParseExample {
 				String key = tagsIterator.next();
 				System.out.println(key + " {" + game.getTag(key) + "}");
 			}
+
+			if (game.isCustomInitialPositionUsed()) {
+				System.out.println("FEN Custom initial position is used!");
+			}
 			
 			System.out.println();
 			printMoves(game, 1, "");

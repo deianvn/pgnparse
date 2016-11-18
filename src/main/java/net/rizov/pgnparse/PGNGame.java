@@ -23,17 +23,31 @@ import java.util.Set;
 public class PGNGame extends PGNMoveContainer {
 
 	private Map<String, String> tags;
+
+	private FENPosition initialPosition;
 	
 	PGNGame() {
 		super();
 		tags = new HashMap<String, String>();
 	}
 
-	void addTag(String key, String value) {
+	public boolean isCustomInitialPositionUsed() {
+        return initialPosition != null;
+    }
+
+    public FENPosition getInitialPosition() {
+        return initialPosition;
+    }
+
+    public void setInitialPosition(FENPosition initialPosition) {
+        this.initialPosition = initialPosition;
+    }
+
+    public void addTag(String key, String value) {
 		tags.put(key, value);
 	}
 
-	void removeTag(String key) {
+	public void removeTag(String key) {
 		tags.remove(key);
 	}
 	
@@ -58,7 +72,7 @@ public class PGNGame extends PGNMoveContainer {
 	}
 
 	public String getFEN(PGNMove move) {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 	
 }

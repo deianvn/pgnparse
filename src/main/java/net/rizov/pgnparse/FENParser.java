@@ -40,11 +40,11 @@ public class FENParser implements PGN {
         for (int i = 0; i < 8; i++) {
             String line = tokens[i];
 
-            for (int j = 0; j < line.length(); j++) {
+            for (int j = 0, pos = 0; j < line.length(); j++, pos++) {
                 char ch = line.charAt(j);
 
                 if (ch >= '1' && ch <= '8') {
-                    j += ch - '1';
+                    pos += ch - '1';
                     continue;
                 }
 
@@ -59,7 +59,8 @@ public class FENParser implements PGN {
                 }
 
                 piece.setType(String.valueOf(ch).toUpperCase());
-                position.addPiece(String.valueOf((char)('a' + j)) + String.valueOf(8 - i), piece);
+                String square = String.valueOf((char)('a' + pos)) + String.valueOf(8 - i);
+                position.addPiece(square, piece);
             }
         }
 

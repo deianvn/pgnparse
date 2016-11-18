@@ -18,7 +18,6 @@ package net.rizov.pgnparse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -129,7 +128,16 @@ public class PGNParser implements PGN {
             } catch (IOException e) {}
         }
 
-        final PGNParserGameState state = (fen == null) ? createDefaultGameState() : createGameState(fen);
+        PGNParserGameState state = null;
+
+        if (fen != null) {
+            FENPosition position = FENParser.parse(fen);
+            state = createGameState(position);
+            game.setInitialPosition(position);
+        } else {
+            state = createDefaultGameState();
+        }
+
         parse(game, pgn.toString(), state);
         return game;
     }
@@ -308,11 +316,19 @@ public class PGNParser implements PGN {
     }
 
     private static void processCommentToken(String token, PGNMoveContainer container) throws PGNParseException {
-        if (container.getMovesCount() > 0) {
-            container.getMove(container.getMovesCount() - 1).setComment(token);
+        PGNMove lastMove = getLastPGNMove(container);
+
+        if (lastMove != null) {
+            lastMove.setComment(token);
         } else {
             throw new PGNParseException("Error near token: " + token);
         }
+    }
+
+    private static PGNMove getLastPGNMove(PGNMoveContainer container) {
+        int movesCount = container.getMovesCount();
+
+        return movesCount > 0 ? container.getMove(movesCount - 1) : null;
     }
 
     static PGNMove parseMove(String move) throws PGNParseException, IndexOutOfBoundsException {
@@ -1042,8 +1058,8 @@ public class PGNParser implements PGN {
         return state;
     }
 
-    private static PGNParserGameState createGameState(String fen) throws PGNParseException {
-        FENPosition position = FENParser.parse(fen);
+    private static PGNParserGameState createGameState(FENPosition position) throws PGNParseException {
+
         PGNParserGameState state = new PGNParserGameState();
         int[][] board = new int[8][8];
 

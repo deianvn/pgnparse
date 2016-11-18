@@ -45,11 +45,19 @@ public abstract class PGNMoveContainer {
     }
 
     public int getMovesCount() {
-        return moves.size();
+        int movesCount = moves.size();
+
+        if (movesCount > 0) {
+            PGNMove lastMove = moves.get(movesCount - 1);
+
+            return lastMove.isEndGameMarked() ? movesCount - 1 : movesCount;
+        }
+
+        return 0;
     }
 
     public int getMovePairsCount() {
-        return moves.size() / 2;
+        return getMovesCount() / 2;
     }
 
 }
