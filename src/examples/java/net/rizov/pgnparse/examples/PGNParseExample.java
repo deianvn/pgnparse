@@ -82,12 +82,11 @@ public class PGNParseExample {
 				System.out.println(tab + ((num + 1) / 2) + ". ");
 			}
 
-            System.out.print(tab + "\t ");
-
             if (move.isEndGameMarked()) {
+				System.out.println();
 				System.out.print("Result: " + move.getMove());
 			} else {
-                System.out.print(move.getColor() + ": ");
+				System.out.print(tab + "\t " + move.getColor() + ": ");
 
                 if (move.isKingSideCastle()) {
                     System.out.print("[O-O]\t");

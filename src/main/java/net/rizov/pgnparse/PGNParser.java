@@ -243,40 +243,42 @@ public class PGNParser implements PGN {
         processMoveToken(token.toString().trim(), container, state);
     }
 
+    private static void rollbackCastling(final PGNMove move, final PGNParserGameState state) {
+        int[][] board = state.board;
+
+        if (move.isKingSideCastle()) {
+            if (WHITE.equals(move.getColor())) {
+                board[4][0] = board[6][0];
+                board[7][0] = board[5][0];
+                board[6][0] = EMPTY;
+                board[5][0] = EMPTY;
+            } else {
+                board[4][7] = board[6][7];
+                board[7][7] = board[5][7];
+                board[6][7] = EMPTY;
+                board[5][7] = EMPTY;
+            }
+        } else {
+            if (WHITE.equals(move.getColor())) {
+                board[4][0] = board[2][0];
+                board[0][0] = board[3][0];
+                board[2][0] = EMPTY;
+                board[3][0] = EMPTY;
+            } else {
+                board[4][7] = board[2][7];
+                board[0][7] = board[3][7];
+                board[2][7] = EMPTY;
+                board[3][7] = EMPTY;
+            }
+        }
+    }
+
     private static void handleGameStateBackMove(PGNMove move, final PGNParserGameState state) {
 
         int[][] board = state.board;
 
         if (move.isCastle()) {
-            if (move.isKingSideCastle()) {
-
-                if (WHITE.equals(move.getColor())) {
-                    board[4][0] = board[6][0];
-                    board[7][0] = board[5][0];
-                    board[6][0] = EMPTY;
-                    board[5][0] = EMPTY;
-                } else {
-                    board[4][7] = board[6][7];
-                    board[7][7] = board[5][7];
-                    board[6][7] = EMPTY;
-                    board[5][7] = EMPTY;
-                }
-            } else {
-
-                if (WHITE.equals(move.getColor())) {
-                    board[4][0] = board[2][0];
-                    board[0][0] = board[3][0];
-                    board[2][0] = EMPTY;
-                    board[3][0] = EMPTY;
-                } else {
-                    board[4][7] = board[2][7];
-                    board[0][7] = board[3][7];
-                    board[2][7] = EMPTY;
-                    board[3][7] = EMPTY;
-                }
-
-            }
-
+            rollbackCastling(move, state);
         } else {
             String from = move.getFromSquare();
             String to = move.getToSquare();
@@ -310,7 +312,7 @@ public class PGNParser implements PGN {
             try {
                 handleToken(token, container, state);
             } catch (RuntimeException e) {
-                throw new PGNParseException("Eror near token: " + token);
+                throw new PGNParseException("Error near token: " + token);
             }
         }
     }
@@ -334,60 +336,6 @@ public class PGNParser implements PGN {
     static PGNMove parseMove(String move) throws PGNParseException, IndexOutOfBoundsException {
         PGNMove pgnMove = new PGNMove();
         pgnMove.setFullMove(move);
-        String piece;
-
-        if (move.startsWith(PAWN)) {
-            piece = PAWN;
-        } else if (move.startsWith(KNIGHT)) {
-            piece = KNIGHT;
-        } else if (move.startsWith(BISHOP)) {
-            piece = BISHOP;
-        } else if (move.startsWith(ROOK)) {
-            piece = ROOK;
-        } else if (move.startsWith(QUEEN)) {
-            piece = QUEEN;
-        } else if (move.startsWith(KING)) {
-            piece = KING;
-        } else {
-            piece = PAWN;
-        }
-
-        pgnMove.setPiece(piece);
-
-        if (move.contains("x")) {
-            pgnMove.setCaptured(true);
-            move = move.replace("x", "");
-        }
-
-        if (move.contains("+")) {
-            pgnMove.setChecked(true);
-            move = move.replace("+", "");
-        }
-
-        if (move.contains("#")) {
-            pgnMove.setCheckMated(true);
-            move = move.replace("#", "");
-        }
-
-        if (move.contains("=")) {
-            String promotedPiece = move.substring(move.indexOf('=') + 1);
-
-            if (promotedPiece.equals(PAWN)
-                    || promotedPiece.equals(KNIGHT)
-                    || promotedPiece.equals(BISHOP)
-                    || promotedPiece.equals(ROOK)
-                    || promotedPiece.equals(QUEEN)
-                    || promotedPiece.equals(KING))
-            {
-                move = move.substring(0, move.indexOf('='));
-                pgnMove.setPromoted(true);
-                pgnMove.setPromotion(promotedPiece);
-            }
-            else
-            {
-                throw new PGNParseException("Wrong piece abr [" + promotedPiece + "]");
-            }
-        }
 
         if (move.equals("0-0") || move.equals("O-O")) {
             pgnMove.setKingSideCastle(true);
@@ -396,6 +344,59 @@ public class PGNParser implements PGN {
         } else if (move.equals("1-0") || move.equals("0-1") || move.equals("1/2-1/2") || move.equals("*")) {
             pgnMove.setEndGameMarked(true);
             pgnMove.setEndGameMark(move);
+        } else {
+
+            String piece;
+
+            if (move.startsWith(PAWN)) {
+                piece = PAWN;
+            } else if (move.startsWith(KNIGHT)) {
+                piece = KNIGHT;
+            } else if (move.startsWith(BISHOP)) {
+                piece = BISHOP;
+            } else if (move.startsWith(ROOK)) {
+                piece = ROOK;
+            } else if (move.startsWith(QUEEN)) {
+                piece = QUEEN;
+            } else if (move.startsWith(KING)) {
+                piece = KING;
+            } else {
+                piece = PAWN;
+            }
+
+            pgnMove.setPiece(piece);
+
+            if (move.contains("x")) {
+                pgnMove.setCaptured(true);
+                move = move.replace("x", "");
+            }
+
+            if (move.contains("+")) {
+                pgnMove.setChecked(true);
+                move = move.replace("+", "");
+            }
+
+            if (move.contains("#")) {
+                pgnMove.setCheckMated(true);
+                move = move.replace("#", "");
+            }
+
+            if (move.contains("=")) {
+                String promotedPiece = move.substring(move.indexOf('=') + 1);
+
+                if (promotedPiece.equals(PAWN)
+                        || promotedPiece.equals(KNIGHT)
+                        || promotedPiece.equals(BISHOP)
+                        || promotedPiece.equals(ROOK)
+                        || promotedPiece.equals(QUEEN)
+                        || promotedPiece.equals(KING)) {
+                    move = move.substring(0, move.indexOf('='));
+                    pgnMove.setPromoted(true);
+                    pgnMove.setPromotion(promotedPiece);
+                } else {
+                    throw new PGNParseException("Error near token: " + pgnMove.getFullMove());
+                }
+            }
         }
 
         pgnMove.setMove(move);
@@ -437,40 +438,43 @@ public class PGNParser implements PGN {
         }
     }
 
-    private static void updateNextMove(PGNMove move, final PGNParserGameState state) throws PGNParseException {
+    private static void performCastling(final PGNMove move, final PGNParserGameState state) {
+        int[][] board = state.board;
+
+        if (move.isKingSideCastle()) {
+            if (WHITE.equals(move.getColor())) {
+                board[6][0] = board[4][0];
+                board[5][0] = board[7][0];
+                board[4][0] = EMPTY;
+                board[7][0] = EMPTY;
+            } else {
+                board[6][7] = board[4][7];
+                board[5][7] = board[7][7];
+                board[4][7] = EMPTY;
+                board[7][7] = EMPTY;
+            }
+        } else {
+            if (WHITE.equals(move.getColor())) {
+                board[2][0] = board[4][0];
+                board[3][0] = board[0][0];
+                board[4][0] = EMPTY;
+                board[0][0] = EMPTY;
+            } else {
+                board[2][7] = board[4][7];
+                board[3][7] = board[0][7];
+                board[4][7] = EMPTY;
+                board[0][7] = EMPTY;
+            }
+
+        }
+    }
+
+    private static void updateNextMove(final PGNMove move, final PGNParserGameState state) throws PGNParseException {
         int[][] board = state.board;
         String strippedMove = move.getMove();
 
         if (move.isCastle()) {
-            if (move.isKingSideCastle()) {
-
-                if (WHITE.equals(move.getColor())) {
-                    board[6][0] = board[4][0];
-                    board[5][0] = board[7][0];
-                    board[4][0] = EMPTY;
-                    board[7][0] = EMPTY;
-                } else {
-                    board[6][7] = board[4][7];
-                    board[5][7] = board[7][7];
-                    board[4][7] = EMPTY;
-                    board[7][7] = EMPTY;
-                }
-            } else {
-
-                if (WHITE.equals(move.getColor())) {
-                    board[2][0] = board[4][0];
-                    board[3][0] = board[0][0];
-                    board[4][0] = EMPTY;
-                    board[0][0] = EMPTY;
-                } else {
-                    board[2][7] = board[4][7];
-                    board[3][7] = board[0][7];
-                    board[4][7] = EMPTY;
-                    board[0][7] = EMPTY;
-                }
-
-            }
-
+            performCastling(move, state);
         } else if (!move.isEndGameMarked()) {
             switch (strippedMove.length()) {
                 case MOVE_TYPE_1_LENGTH :
