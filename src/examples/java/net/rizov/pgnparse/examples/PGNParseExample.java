@@ -24,11 +24,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 
-/**
- *
- * @author Deyan Rizov
- *
- */
+
 public class PGNParseExample {
 
 	public static void main(String[] args) throws IOException, PGNParseException {

@@ -21,6 +21,11 @@ import java.io.StringReader;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * @author Deyan Rizov
+ *
+ * Parser utility for PGN strings
+ */
 public class PGNParser implements PGN {
 
     private static final String MOVE_TYPE_1_RE = "[a-h][1-8]";
@@ -81,6 +86,16 @@ public class PGNParser implements PGN {
 
     private static final int[][] QUEEN_KING_SEARCH_PATH = { {1, 1}, {1, -1}, {-1, -1}, {-1, 1}, {0, 1}, {1, 0}, {0, -1}, {-1, 0} };
 
+    /**
+     * Parse the string argument as a PGN game object.
+     * The string should be a valid portable game notation (PGN) text.
+     * @param pgnGame
+     * a {@link String} containing the PGN text
+     * @return
+     * the {@link PGNGame} object containing the parsed PGN data
+     * @throws PGNParseException
+     * if the String does not contain parsable PGN
+     */
     public static PGNGame parsePGNGame(String pgnGame) throws PGNParseException {
         final PGNGame game = new PGNGame();
 
@@ -142,6 +157,14 @@ public class PGNParser implements PGN {
         return game;
     }
 
+    /**
+     * Split PGN string containg multiple chess games
+     * @param pgn
+     * PGN string containg multiple chess games
+     * @return
+     * List of PGN strings each describing a single game
+     * @throws PGNParseException
+     */
     public static List<String> splitPGNString(String pgn) throws PGNParseException {
         List<String> pgnGames = new LinkedList<String>();
         BufferedReader br = new BufferedReader(new StringReader(pgn));
@@ -172,8 +195,6 @@ public class PGNParser implements PGN {
 
         return pgnGames;
     }
-
-
 
     private static int getLineEndIndex(String line, int start) {
         int index = line.indexOf('\n', start);

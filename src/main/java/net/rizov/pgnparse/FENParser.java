@@ -15,8 +15,23 @@
  */
 package net.rizov.pgnparse;
 
+/**
+ * @author Deyan Rizov
+ *
+ * Parser utility for FEN strings
+ */
 public class FENParser implements PGN {
 
+    /**
+     * Parse the string argument as a FEN position object.
+     * The string should be a valid Forsyth–Edwards Notation (FEN) text.
+     * @param fen
+     * a {@link String} containing the FEN text
+     * @return
+     * the {@link FENPosition} object containing the parsed FEN data
+     * @throws PGNParseException
+     * if the String does not contain parsable FEN
+     */
     public static FENPosition parse(String fen) throws PGNParseException {
 
         String[] tokens = fen.split("\\s+|/");
