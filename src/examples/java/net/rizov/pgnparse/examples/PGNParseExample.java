@@ -27,62 +27,62 @@ import java.util.Iterator;
 
 public class PGNParseExample {
 
-	public static void main(String[] args) throws IOException, PGNParseException {
-		if (args.length == 0) {
-			System.out.println("Usage:");
-			System.out.println("\tpgn_path");
-			return;
-		}
-		
-		File file = new File(args[0]);
-		
-		if (!file.exists()) {
-			System.out.println("File does not exist!");
-			return;
-		}
-		
-		PGNSource source = new PGNSource(file);
-		Iterator<PGNGame> i = source.listGames().iterator();
-		
-		while (i.hasNext()) {
-			PGNGame game = i.next();
-			
-			System.out.println("############################");
-			Iterator<String> tagsIterator = game.getTagKeysIterator();
-			
-			while (tagsIterator.hasNext()) {
-				String key = tagsIterator.next();
-				System.out.println(key + " {" + game.getTag(key) + "}");
-			}
+    public static void main(String[] args) throws IOException, PGNParseException {
+        if (args.length == 0) {
+            System.out.println("Usage:");
+            System.out.println("\tpgn_path");
+            return;
+        }
 
-			if (game.isCustomInitialPositionUsed()) {
-				System.out.println("FEN Custom initial position is used!");
-			}
-			
-			System.out.println();
-			printMoves(game, 1, "");
-			System.out.println();
-		}
-	}
+        File file = new File(args[0]);
 
-	private static void printMoves(PGNMoveContainer container, int startMove, String tab) {
-		Iterator<PGNMove> movesIterator = container.getMovesIterator();
-		int num = startMove;
+        if (!file.exists()) {
+            System.out.println("File does not exist!");
+            return;
+        }
 
-		while (movesIterator.hasNext()) {
-			PGNMove move = movesIterator.next();
+        PGNSource source = new PGNSource(file);
+        Iterator<PGNGame> i = source.listGames().iterator();
 
-			boolean isPairStart = num % 2 == 1;
+        while (i.hasNext()) {
+            PGNGame game = i.next();
 
-			if (isPairStart && !move.isEndGameMarked()) {
-				System.out.println(tab + ((num + 1) / 2) + ". ");
-			}
+            System.out.println("############################");
+            Iterator<String> tagsIterator = game.getTagKeysIterator();
+
+            while (tagsIterator.hasNext()) {
+                String key = tagsIterator.next();
+                System.out.println(key + " {" + game.getTag(key) + "}");
+            }
+
+            if (game.isCustomInitialPositionUsed()) {
+                System.out.println("FEN Custom initial position is used!");
+            }
+
+            System.out.println();
+            printMoves(game, 1, "");
+            System.out.println();
+        }
+    }
+
+    private static void printMoves(PGNMoveContainer container, int startMove, String tab) {
+        Iterator<PGNMove> movesIterator = container.getMovesIterator();
+        int num = startMove;
+
+        while (movesIterator.hasNext()) {
+            PGNMove move = movesIterator.next();
+
+            boolean isPairStart = num % 2 == 1;
+
+            if (isPairStart && !move.isEndGameMarked()) {
+                System.out.println(tab + ((num + 1) / 2) + ". ");
+            }
 
             if (move.isEndGameMarked()) {
-				System.out.println();
-				System.out.print("Result: " + move.getMove());
-			} else {
-				System.out.print(tab + "\t " + move.getColor() + ": ");
+                System.out.println();
+                System.out.print("Result: " + move.getMove());
+            } else {
+                System.out.print(tab + "\t " + move.getColor() + ": ");
 
                 if (move.isKingSideCastle()) {
                     System.out.print("[O-O]\t");
@@ -93,13 +93,13 @@ public class PGNParseExample {
                 }
             }
 
-			if (move.getComment().length() > 0) {
-				System.out.print("// " + move.getComment());
-			}
+            if (move.getComment().length() > 0) {
+                System.out.print("// " + move.getComment());
+            }
 
-			System.out.println();
+            System.out.println();
 
-			if (move.hasVariations()) {
+            if (move.hasVariations()) {
                 if (isPairStart) {
                     System.out.println();
                 }
@@ -108,10 +108,10 @@ public class PGNParseExample {
             }
 
             num++;
-		}
-	}
+        }
+    }
 
-	private static void printVariations(PGNMove move, int currentMoveNum, String tab) {
+    private static void printVariations(PGNMove move, int currentMoveNum, String tab) {
         Iterator<PGNVariation> vi = move.getVariationsIterator();
 
         while (vi.hasNext()) {
