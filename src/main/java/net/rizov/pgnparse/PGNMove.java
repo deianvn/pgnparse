@@ -22,45 +22,45 @@ import java.util.List;
 
 public class PGNMove {
 
-	private String move;
+    private String move;
 
-	private String fullMove;
-	
-	private String fromSquare;
-	
-	private String toSquare;
-	
-	private String piece;
-	
-	private String color;
+    private String fullMove;
+
+    private String fromSquare;
+
+    private String toSquare;
+
+    private String piece;
+
+    private String color;
 
     private String capturedPiece;
-	
-	private String comment = "";
 
-	private boolean checked;
-	
-	private boolean checkMated;
+    private String comment = "";
 
-	private boolean captured;
+    private boolean checked;
 
-	private boolean promoted;
+    private boolean checkMated;
 
-	private String promotion;
+    private boolean captured;
 
-	private boolean endGameMarked;
+    private boolean promoted;
 
-	private String endGameMark;
-	
-	private boolean kingSideCastle;
-	
-	private boolean queenSideCastle;
-	
-	private boolean enpassant;
-	
-	private boolean enpassantCapture;
-	
-	private String enpassantPieceSquare;
+    private String promotion;
+
+    private boolean endGameMarked;
+
+    private String endGameMark;
+
+    private boolean kingSideCastle;
+
+    private boolean queenSideCastle;
+
+    private boolean enpassant;
+
+    private boolean enpassantCapture;
+
+    private String enpassantPieceSquare;
 
     private List<PGNVariation> variations;
 

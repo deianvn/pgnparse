@@ -17,31 +17,31 @@ package net.rizov.pgnparse;
 
 public class PGNParseException extends Exception {
 
-	private static final long serialVersionUID = -2253519940443925317L;
+    private static final long serialVersionUID = -2253519940443925317L;
 
-	public PGNParseException() {
-	}
+    public PGNParseException() {
+    }
 
-	/**
-	 * @param message
-	 */
-	public PGNParseException(String message) {
-		super(message);
-	}
+    /**
+     * @param message
+     */
+    public PGNParseException(String message) {
+        super(message);
+    }
 
-	/**
-	 * @param cause
-	 */
-	public PGNParseException(Throwable cause) {
-		super(cause);
-	}
+    /**
+     * @param cause
+     */
+    public PGNParseException(Throwable cause) {
+        super(cause);
+    }
 
-	/**
-	 * @param message
-	 * @param cause
-	 */
-	public PGNParseException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    /**
+     * @param message
+     * @param cause
+     */
+    public PGNParseException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
 }

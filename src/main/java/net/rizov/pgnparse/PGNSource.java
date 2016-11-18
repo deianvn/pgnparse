@@ -27,69 +27,69 @@ import java.util.List;
 
 public class PGNSource {
 
-	private String source;
-	
-	public PGNSource(String pgn) {
-		if (pgn == null) {
-			throw new NullPointerException("PGN data is null");
-		}
-		
-		this.source = pgn;
-	}
-	
-	public PGNSource(File file) throws IOException {
-		this(new FileInputStream(file));
-	}
-	
-	public PGNSource(URL url) throws IOException {
-		this(url.openStream());
-	}
-	
-	public PGNSource(InputStream inputStream) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-		String line;
-		StringBuilder buffer = new StringBuilder();
-		
-		while ((line = br.readLine()) != null) {
-			buffer.append(line + "\n");
-		}
-		
-		br.close();
-		this.source = buffer.toString();
-	}
-	
-	@Override
-	public String toString() {
-		return source;
-	}
-	
-	public List<PGNGame> listGames() throws PGNParseException {
-		List<String> pgns = PGNParser.splitPGNString(source);
-		ArrayList<PGNGame> games = new ArrayList<PGNGame>();
+    private String source;
 
-		for (String pgn : pgns) {
-			games.add(PGNParser.parsePGNGame(pgn));
-		}
+    public PGNSource(String pgn) {
+        if (pgn == null) {
+            throw new NullPointerException("PGN data is null");
+        }
 
-		return games;
-	}
-	
-	public List<PGNGame> listGames(boolean force) throws PGNParseException {
+        this.source = pgn;
+    }
 
-		if (!force) {
-			return listGames();
-		}
+    public PGNSource(File file) throws IOException {
+        this(new FileInputStream(file));
+    }
 
-		List<String> pgns = PGNParser.splitPGNString(source);
-		ArrayList<PGNGame> games = new ArrayList<PGNGame>();
+    public PGNSource(URL url) throws IOException {
+        this(url.openStream());
+    }
 
-		for (String pgn : pgns) {
-			try {
-				games.add(PGNParser.parsePGNGame(pgn));
-			} catch (PGNParseException e) {}
-		}
+    public PGNSource(InputStream inputStream) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+        String line;
+        StringBuilder buffer = new StringBuilder();
 
-		return games;
-	}
-	
+        while ((line = br.readLine()) != null) {
+            buffer.append(line + "\n");
+        }
+
+        br.close();
+        this.source = buffer.toString();
+    }
+
+    @Override
+    public String toString() {
+        return source;
+    }
+
+    public List<PGNGame> listGames() throws PGNParseException {
+        List<String> pgns = PGNParser.splitPGNString(source);
+        ArrayList<PGNGame> games = new ArrayList<PGNGame>();
+
+        for (String pgn : pgns) {
+            games.add(PGNParser.parsePGNGame(pgn));
+        }
+
+        return games;
+    }
+
+    public List<PGNGame> listGames(boolean force) throws PGNParseException {
+
+        if (!force) {
+            return listGames();
+        }
+
+        List<String> pgns = PGNParser.splitPGNString(source);
+        ArrayList<PGNGame> games = new ArrayList<PGNGame>();
+
+        for (String pgn : pgns) {
+            try {
+                games.add(PGNParser.parsePGNGame(pgn));
+            } catch (PGNParseException e) {}
+        }
+
+        return games;
+    }
+
 }
