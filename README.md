@@ -7,8 +7,9 @@ pgnparse is a lightweight PGN parsing library written in the Java language.
 
 License
 -------
-Copyright 2016 Deyan Rizov
 ```
+    Copyright 2016 Deyan Rizov
+
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
