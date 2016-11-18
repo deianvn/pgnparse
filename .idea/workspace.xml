@@ -1,14 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="778fad88-29b8-497d-8dfa-b27f7e823554" name="Default" comment="Move fen parsing in a separate class">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/examples/java/net/rizov/pgnparse/examples/PGNParseExample.java" afterPath="$PROJECT_DIR$/src/examples/java/net/rizov/pgnparse/examples/PGNParseExample.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/FENParser.java" afterPath="$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/FENParser.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/PGNGame.java" afterPath="$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/PGNGame.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/PGNMoveContainer.java" afterPath="$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/PGNMoveContainer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/PGNParser.java" afterPath="$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/PGNParser.java" />
-    </list>
+    <list default="true" id="778fad88-29b8-497d-8dfa-b27f7e823554" name="Default" comment="" />
     <ignored path="pgnparse.iws" />
     <ignored path=".idea/workspace.xml" />
     <ignored path="$PROJECT_DIR$/.gradle/" />
@@ -1213,12 +1206,19 @@
       <option name="project" value="LOCAL" />
       <updated>1479400561758</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="Fix fen parsing bug and update game class to contain the initial position">
+      <created>1479481641040</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1479481641040</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1170" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -1274,7 +1274,8 @@
     <MESSAGE value="- Added basic fen start position support" />
     <MESSAGE value="Make parser consistent by removing Color enum with String and fixing parsing test class" />
     <MESSAGE value="Move fen parsing in a separate class" />
-    <option name="LAST_COMMIT_MESSAGE" value="Move fen parsing in a separate class" />
+    <MESSAGE value="Fix fen parsing bug and update game class to contain the initial position" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix fen parsing bug and update game class to contain the initial position" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
