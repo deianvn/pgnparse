@@ -437,14 +437,14 @@ public class PGNParser implements PGN {
             return;
         } else if (token.startsWith("{") && token.endsWith("}")) {
             move.setComment(token.substring(1, token.length() - 1));
+        } else if (token.equals("1-0") || token.equals("0-1") || token.equals("1/2-1/2") || token.equals("*")) {
+            move.setEndGameMarked(true);
+            move.setEndGameMark(token);
         } else {
             move = parseMove(token);
 
             if (validateMove(move)) {
-                if (move.isEndGameMarked()) {
-                    move.setColor(NONE);
-                    move.setColor(NONE);
-                } else if (state.currentPlayer == W) {
+                if (state.currentPlayer == W) {
                     move.setColor(WHITE);
                 } else {
                     move.setColor(BLACK);

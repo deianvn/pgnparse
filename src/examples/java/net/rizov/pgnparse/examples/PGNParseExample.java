@@ -80,7 +80,7 @@ public class PGNParseExample {
 
             if (move.isEndGameMarked()) {
                 System.out.println();
-                System.out.print("Result: " + move.getMove());
+                System.out.print("Result: " + move.getEndGameMark());
             } else {
                 System.out.print(tab + "\t " + move.getColor() + ": ");
 

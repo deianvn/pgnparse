@@ -36,7 +36,7 @@ public abstract class PGNMoveContainer {
         return moves.get(index);
     }
 
-    public List<PGNMove> getMove() {
+    public List<PGNMove> getMoves() {
         return Collections.unmodifiableList(moves);
     }
 
@@ -45,19 +45,11 @@ public abstract class PGNMoveContainer {
     }
 
     public int getMovesCount() {
-        int movesCount = moves.size();
-
-        if (movesCount > 0) {
-            PGNMove lastMove = moves.get(movesCount - 1);
-
-            return lastMove.isEndGameMarked() ? movesCount - 1 : movesCount;
-        }
-
-        return 0;
+        return moves.size();
     }
 
     public int getMovePairsCount() {
-        return getMovesCount() / 2;
+        return moves.size() / 2;
     }
 
 }
