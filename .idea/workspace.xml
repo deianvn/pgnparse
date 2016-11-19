@@ -3,8 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="778fad88-29b8-497d-8dfa-b27f7e823554" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/examples/java/net/rizov/pgnparse/examples/PGNParseExample.java" afterPath="$PROJECT_DIR$/src/examples/java/net/rizov/pgnparse/examples/PGNParseExample.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/PGNMoveContainer.java" afterPath="$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/PGNMoveContainer.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/PGNParser.java" afterPath="$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/PGNParser.java" />
     </list>
     <ignored path="pgnparse.iws" />
@@ -122,8 +120,18 @@
       <file leaf-file-name="PGNParser.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/PGNParser.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="280">
-              <caret line="442" column="16" selection-start-line="442" selection-start-column="16" selection-end-line="442" selection-end-column="16" />
+            <state relative-caret-position="198">
+              <caret line="364" column="0" selection-start-line="364" selection-start-column="0" selection-end-line="364" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="PGNParseBenchmark.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/examples/java/net/rizov/pgnparse/examples/PGNParseBenchmark.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="407">
+              <caret line="59" column="44" selection-start-line="59" selection-start-column="44" selection-end-line="59" selection-end-column="44" />
               <folding />
             </state>
           </provider>
@@ -132,8 +140,8 @@
       <file leaf-file-name="PGNParseExample.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/examples/java/net/rizov/pgnparse/examples/PGNParseExample.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="281">
-              <caret line="82" column="67" selection-start-line="82" selection-start-column="67" selection-end-line="82" selection-end-column="67" />
+            <state relative-caret-position="227">
+              <caret line="79" column="0" selection-start-line="79" selection-start-column="0" selection-end-line="79" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -510,7 +518,6 @@
         <option value="$PROJECT_DIR$/src/examples/java/net/rizov/pgnparse/examples/PGNParseTest.java" />
         <option value="$PROJECT_DIR$/build.gradle" />
         <option value="$PROJECT_DIR$/src/examples/java/net/rizov/pgnparse/examples/PGNParserExample.java" />
-        <option value="$PROJECT_DIR$/src/examples/java/net/rizov/pgnparse/examples/PGNParseBenchmark.java" />
         <option value="$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/parser/GameState.java" />
         <option value="$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/GameState.java" />
         <option value="$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/PGN.java" />
@@ -524,8 +531,9 @@
         <option value="$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/PGNSource.java" />
         <option value="$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/Piece.java" />
         <option value="$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/PGNMoveContainer.java" />
-        <option value="$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/PGNParser.java" />
         <option value="$PROJECT_DIR$/src/examples/java/net/rizov/pgnparse/examples/PGNParseExample.java" />
+        <option value="$PROJECT_DIR$/src/examples/java/net/rizov/pgnparse/examples/PGNParseBenchmark.java" />
+        <option value="$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/PGNParser.java" />
       </list>
     </option>
   </component>
@@ -670,7 +678,7 @@
     <property name="settings.editor.selected.configurable" value="Errors" />
     <property name="settings.editor.splitter.proportion" value="0.2" />
   </component>
-  <component name="RunManager" selected="Application.PGNParseExample">
+  <component name="RunManager" selected="Application.PGNParseBenchmark">
     <configuration default="false" name="PGNParseExample" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
         <pattern>
@@ -700,7 +708,7 @@
       </extension>
       <option name="MAIN_CLASS_NAME" value="net.rizov.pgnparse.examples.PGNParseBenchmark" />
       <option name="VM_PARAMETERS" value="" />
-      <option name="PROGRAM_PARAMETERS" value="E:\Test\opensource\db" />
+      <option name="PROGRAM_PARAMETERS" value="$USER_HOME$/Documents/pgn" />
       <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
@@ -1031,8 +1039,8 @@
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Application.PGNParseExample" />
-        <item index="1" class="java.lang.String" itemvalue="Application.PGNParseBenchmark" />
+        <item index="0" class="java.lang.String" itemvalue="Application.PGNParseBenchmark" />
+        <item index="1" class="java.lang.String" itemvalue="Application.PGNParseExample" />
         <item index="2" class="java.lang.String" itemvalue="Gradle.pgnparse [jar]" />
         <item index="3" class="java.lang.String" itemvalue="Gradle.pgnparse [build]" />
         <item index="4" class="java.lang.String" itemvalue="Gradle.pgnparse [init]" />
@@ -1211,7 +1219,14 @@
       <option name="project" value="LOCAL" />
       <updated>1479504950465</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="Fix typo and add end game mark to the last move of the game">
+      <created>1479590847863</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1479590847863</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -1225,7 +1240,7 @@
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3236715" sideWeight="0.50416666" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.31479537" sideWeight="0.49583334" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.31479537" sideWeight="0.49583334" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32983193" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -1278,7 +1293,8 @@
     <MESSAGE value="License added to README.md file" />
     <MESSAGE value="License text fixed" />
     <MESSAGE value="tabs to spaces" />
-    <option name="LAST_COMMIT_MESSAGE" value="tabs to spaces" />
+    <MESSAGE value="Fix typo and add end game mark to the last move of the game" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix typo and add end game mark to the last move of the game" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -1487,13 +1503,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/examples/java/net/rizov/pgnparse/examples/PGNParseBenchmark.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="74">
-          <caret line="47" column="0" selection-start-line="47" selection-start-column="0" selection-end-line="47" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/Piece.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="414">
@@ -1525,18 +1534,26 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/examples/java/net/rizov/pgnparse/examples/PGNParseBenchmark.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="407">
+          <caret line="59" column="44" selection-start-line="59" selection-start-column="44" selection-end-line="59" selection-end-column="44" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/examples/java/net/rizov/pgnparse/examples/PGNParseExample.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="281">
-          <caret line="82" column="67" selection-start-line="82" selection-start-column="67" selection-end-line="82" selection-end-column="67" />
+        <state relative-caret-position="227">
+          <caret line="79" column="0" selection-start-line="79" selection-start-column="0" selection-end-line="79" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/net/rizov/pgnparse/PGNParser.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="280">
-          <caret line="442" column="16" selection-start-line="442" selection-start-column="16" selection-end-line="442" selection-end-column="16" />
+        <state relative-caret-position="198">
+          <caret line="364" column="0" selection-start-line="364" selection-start-column="0" selection-end-line="364" selection-end-column="0" />
           <folding />
         </state>
       </provider>

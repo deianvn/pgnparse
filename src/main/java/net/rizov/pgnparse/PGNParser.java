@@ -358,13 +358,20 @@ public class PGNParser implements PGN {
         PGNMove pgnMove = new PGNMove();
         pgnMove.setFullMove(move);
 
+        if (move.contains("+")) {
+            pgnMove.setChecked(true);
+            move = move.replace("+", "");
+        }
+
+        if (move.contains("#")) {
+            pgnMove.setCheckMated(true);
+            move = move.replace("#", "");
+        }
+
         if (move.equals("0-0") || move.equals("O-O")) {
             pgnMove.setKingSideCastle(true);
         } else if (move.equals("0-0-0") || move.equals("O-O-O")) {
             pgnMove.setQueenSideCastle(true);
-        } else if (move.equals("1-0") || move.equals("0-1") || move.equals("1/2-1/2") || move.equals("*")) {
-            pgnMove.setEndGameMarked(true);
-            pgnMove.setEndGameMark(move);
         } else {
 
             String piece;
@@ -390,16 +397,6 @@ public class PGNParser implements PGN {
             if (move.contains("x")) {
                 pgnMove.setCaptured(true);
                 move = move.replace("x", "");
-            }
-
-            if (move.contains("+")) {
-                pgnMove.setChecked(true);
-                move = move.replace("+", "");
-            }
-
-            if (move.contains("#")) {
-                pgnMove.setCheckMated(true);
-                move = move.replace("#", "");
             }
 
             if (move.contains("=")) {
