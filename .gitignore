@@ -1,2 +1,4 @@
-/.gradle
-/build
+.gradle
+.idea
+.DS_Store
+build
