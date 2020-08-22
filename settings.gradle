@@ -1,2 +1,4 @@
 rootProject.name = 'pgnparse'
+include 'lib'
+include 'examples'
 

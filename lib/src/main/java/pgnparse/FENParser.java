@@ -1,4 +1,4 @@
-package com.github.deianvn.pgnparse;
+package pgnparse;
 
 /**
  * @author Deyan Rizov
@@ -6,6 +6,10 @@ package com.github.deianvn.pgnparse;
  * Parser utility for FEN strings
  */
 public class FENParser implements PGN {
+
+  private FENParser() {
+
+  }
 
   /**
    * Parse the string argument as a FEN position object.

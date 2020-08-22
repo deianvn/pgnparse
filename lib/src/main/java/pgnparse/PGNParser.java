@@ -1,4 +1,4 @@
-package com.github.deianvn.pgnparse;
+package pgnparse;
 
 import java.io.BufferedReader;
 import java.io.IOException;

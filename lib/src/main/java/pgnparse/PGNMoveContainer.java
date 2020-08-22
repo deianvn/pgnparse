@@ -1,4 +1,4 @@
-package com.github.deianvn.pgnparse;
+package pgnparse;
 
 import java.util.Collections;
 import java.util.Iterator;
