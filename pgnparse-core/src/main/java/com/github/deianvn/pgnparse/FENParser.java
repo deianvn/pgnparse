@@ -1,4 +1,4 @@
-package pgnparse;
+package com.github.deianvn.pgnparse;
 
 /**
  * @author Deyan Rizov
@@ -24,7 +24,7 @@ public class FENParser implements PGN {
     String[] tokens = fen.split("\\s+|/");
 
     if (tokens.length != 13) {
-      throw new PGNParseException("Invalid FEN position: " + fen);
+      throw new PGNParseException(fen);
     }
 
     FENPosition position = new FENPosition();
@@ -58,7 +58,7 @@ public class FENParser implements PGN {
         } else if (ch >= 'A' && ch <= 'Z') {
           piece.setColor(WHITE);
         } else {
-          throw new PGNParseException("Invalid FEN position: " + fen);
+          throw new PGNParseException(fen);
         }
 
         piece.setType(String.valueOf(ch).toUpperCase());
@@ -82,7 +82,7 @@ public class FENParser implements PGN {
     for (int i = 0; i < castlingToken.length(); i++) {
       if (castlingToken.charAt(i) == '-') {
         if (castlingToken.length() != 1) {
-          throw new PGNParseException("Invalid FEN position: " + fen);
+          throw new PGNParseException(fen);
         }
 
         break;
@@ -107,11 +107,11 @@ public class FENParser implements PGN {
           enpassentToken.charAt(1) >= '1' && enpassentToken.charAt(1) <= '8') {
         position.setEnpassantSquare(enpassentToken);
       } else {
-        throw new PGNParseException("Invalid FEN position: " + fen);
+        throw new PGNParseException(fen);
       }
     } else {
       if (!enpassentToken.equals("-")) {
-        throw new PGNParseException("Invalid FEN position: " + fen);
+        throw new PGNParseException(fen);
       }
     }
   }
@@ -122,7 +122,7 @@ public class FENParser implements PGN {
       int halfMoves = Integer.parseInt(tokens[11]);
       position.setHalfMoves(halfMoves);
     } catch (NumberFormatException e) {
-      throw new PGNParseException("Invalid FEN position: " + fen);
+      throw new PGNParseException(fen);
     }
   }
 
@@ -132,7 +132,7 @@ public class FENParser implements PGN {
       int fullMoves = Integer.parseInt(tokens[12]);
       position.setFullMoves(fullMoves);
     } catch (NumberFormatException e) {
-      throw new PGNParseException("Invalid FEN position: " + fen);
+      throw new PGNParseException(fen);
     }
   }
 

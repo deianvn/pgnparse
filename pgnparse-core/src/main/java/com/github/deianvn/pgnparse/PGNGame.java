@@ -1,4 +1,4 @@
-package pgnparse;
+package com.github.deianvn.pgnparse;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -7,13 +7,11 @@ import java.util.Set;
 
 public class PGNGame extends PGNMoveContainer {
 
-  private Map<String, String> tags;
+  private final Map<String, String> tags = new HashMap<>();
 
   private FENPosition initialPosition;
 
   PGNGame() {
-    super();
-    tags = new HashMap<String, String>();
   }
 
   public boolean isCustomInitialPositionUsed() {

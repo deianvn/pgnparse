@@ -3,16 +3,17 @@ package com.github.deianvn.pgnparse.examples;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
-import pgnparse.PGNGame;
-import pgnparse.PGNMove;
-import pgnparse.PGNMoveContainer;
-import pgnparse.PGNParseException;
-import pgnparse.PGNSource;
-import pgnparse.PGNVariation;
+import com.github.deianvn.pgnparse.PGNGame;
+import com.github.deianvn.pgnparse.PGNMove;
+import com.github.deianvn.pgnparse.PGNMoveContainer;
+import com.github.deianvn.pgnparse.PGNParseException;
+import com.github.deianvn.pgnparse.PGNSource;
+import com.github.deianvn.pgnparse.PGNVariation;
 
 public class PGNParseExample {
 
-  public static void main(String[] args) throws IOException, PGNParseException {
+  public static void main(String[] args)
+      throws IOException, PGNParseException {
     if (args.length == 0) {
       System.out.println("Usage:");
       System.out.println("\tpgn_path");

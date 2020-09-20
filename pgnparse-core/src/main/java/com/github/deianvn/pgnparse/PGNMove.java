@@ -1,4 +1,4 @@
-package pgnparse;
+package com.github.deianvn.pgnparse;
 
 import java.util.ArrayList;
 import java.util.Collections;

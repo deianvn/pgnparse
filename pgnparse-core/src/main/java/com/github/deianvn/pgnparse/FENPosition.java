@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package pgnparse;
+package com.github.deianvn.pgnparse;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,7 +38,7 @@ public class FENPosition {
 
   private String enpassantSquare;
 
-  private Map<String, Piece> occupiedSquares = new HashMap<String, Piece>();
+  private final Map<String, Piece> occupiedSquares = new HashMap<>();
 
   public Set<String> getOccupiedSquares() {
     return Collections.unmodifiableSet(occupiedSquares.keySet());

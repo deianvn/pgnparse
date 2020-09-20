@@ -3,13 +3,13 @@ plugins {
 }
 
 group 'com.github.deianvn'
-version '1.0-SNAPSHOT'
+version '1.0'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compile project(':lib')
+    compile project(':pgnparse-core')
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }

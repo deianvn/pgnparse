@@ -1,14 +1,14 @@
 package com.github.deianvn.pgnparse.examples;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
-import pgnparse.PGNParseException;
-import pgnparse.PGNSource;
+import com.github.deianvn.pgnparse.PGNParseException;
+import com.github.deianvn.pgnparse.PGNSource;
 
 public class PGNParseBenchmark {
 
-  public static void main(String[] args) throws IOException, PGNParseException {
+  public static void main(String[] args)
+      throws IOException, PGNParseException {
     if (args.length == 0) {
       System.out.println("Usage:");
       System.out.println("\tpgn_directory_path");
@@ -22,12 +22,7 @@ public class PGNParseBenchmark {
       return;
     }
 
-    String[] pgnFileNames = file.list(new FilenameFilter() {
-      @Override
-      public boolean accept(File dir, String name) {
-        return name.endsWith(".pgn");
-      }
-    });
+    String[] pgnFileNames = file.list((dir, name) -> name.endsWith(".pgn"));
 
     if (pgnFileNames == null) {
       System.out.println("Error reading files");

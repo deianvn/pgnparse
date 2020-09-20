@@ -1,9 +1,6 @@
-package pgnparse;
+package com.github.deianvn.pgnparse;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -77,6 +74,10 @@ public class PGNParser implements PGN {
   private static final int[][] QUEEN_KING_SEARCH_PATH = {{1, 1}, {1, -1}, {-1, -1}, {-1, 1}, {0, 1},
       {1, 0}, {0, -1}, {-1, 0}};
 
+  private PGNParser() {
+
+  }
+
   /**
    * Parse the string argument as a PGN game object.
    * The string should be a valid portable game notation (PGN) text.
@@ -85,56 +86,45 @@ public class PGNParser implements PGN {
    * @return the {@link PGNGame} object containing the parsed PGN data
    * @throws PGNParseException if the String does not contain parsable PGN
    */
-  public static PGNGame parsePGNGame(String pgnGame)
+  public static PGNGame parse(String pgnGame)
       throws PGNParseException {
     final PGNGame game = new PGNGame();
-
-    BufferedReader br = new BufferedReader(new StringReader(pgnGame));
-    String line;
+    String[] lines = pgnGame.split("\\R");
     StringBuilder pgn = new StringBuilder();
     int lineNumber = 1;
     String fen = null;
 
-    try {
-      while ((line = br.readLine()) != null) {
-        line = line.trim();
+    for (String line : lines) {
+      line = line.trim();
 
-        if (line.startsWith("@")) {
-          lineNumber++;
-          continue;
-        }
-
-        if (line.startsWith("[")) {
-          try {
-            String tagName = line.substring(1, line.indexOf("\"")).trim();
-            String tagValue = line.substring(line.indexOf("\"") + 1,
-                line.lastIndexOf("\""));
-            game.addTag(tagName, tagValue);
-
-            if (tagName.compareTo("FEN") == 0) {
-              fen = tagValue;
-            }
-          } catch (IndexOutOfBoundsException e) {
-            throw new PGNParseException("Error in line " + lineNumber);
-          }
-        } else {
-          if (!line.isEmpty()) {
-            pgn.append(line + "\n");
-          }
-        }
-
+      if (line.startsWith("@")) {
         lineNumber++;
+        continue;
       }
-    } catch (IOException e) {
-      throw new PGNParseException(e);
-    } finally {
-      try {
-        br.close();
-      } catch (IOException e) {
+
+      if (line.startsWith("[")) {
+        try {
+          String tagName = line.substring(1, line.indexOf("\"")).trim();
+          String tagValue = line.substring(line.indexOf("\"") + 1,
+              line.lastIndexOf("\""));
+          game.addTag(tagName, tagValue);
+
+          if (tagName.compareTo("FEN") == 0) {
+            fen = tagValue;
+          }
+        } catch (IndexOutOfBoundsException e) {
+          throw new PGNParseException("Error in line " + lineNumber);
+        }
+      } else {
+        if (!line.isEmpty()) {
+          pgn.append(line).append("\n");
+        }
       }
+
+      lineNumber++;
     }
 
-    PGNParserGameState state = null;
+    PGNParserGameState state;
 
     if (fen != null) {
       FENPosition position = FENParser.parse(fen);
@@ -149,39 +139,27 @@ public class PGNParser implements PGN {
   }
 
   /**
-   * Split PGN string containg multiple chess games
+   * Split PGN string containing multiple chess games
    *
-   * @param pgn PGN string containg multiple chess games
+   * @param text multiple PGNs in a string
    * @return List of PGN strings each describing a single game
    */
-  public static List<String> splitPGNString(String pgn)
-      throws PGNParseException {
-    List<String> pgnGames = new LinkedList<String>();
-    BufferedReader br = new BufferedReader(new StringReader(pgn));
-    String line;
+  public static List<String> split(String text) {
+    List<String> pgnGames = new ArrayList<>();
+    String[] lines = text.split("\\R");
     StringBuilder buffer = new StringBuilder();
 
-    try {
-      while ((line = br.readLine()) != null) {
-        line = line.trim();
+    for (String line : lines) {
+      line = line.trim();
 
-        if (!line.isEmpty()) {
-          buffer.append(line + "\n");
+      if (!line.isEmpty()) {
+        buffer.append(line).append("\n");
 
-          if (line.endsWith("1-0") || line.endsWith("0-1") || line.endsWith("1/2-1/2") || line
-              .endsWith("*")) {
-            pgnGames.add(buffer.toString());
-            buffer.delete(0, buffer.length());
-          }
+        if (line.endsWith("1-0") || line.endsWith("0-1") || line.endsWith("1/2-1/2") || line
+            .endsWith("*")) {
+          pgnGames.add(buffer.toString());
+          buffer.delete(0, buffer.length());
         }
-
-      }
-    } catch (IOException e) {
-      throw new PGNParseException(e);
-    } finally {
-      try {
-        br.close();
-      } catch (IOException e) {
       }
     }
 
@@ -334,7 +312,7 @@ public class PGNParser implements PGN {
       try {
         handleToken(token, container, state);
       } catch (RuntimeException e) {
-        throw new PGNParseException("Error near token: " + token);
+        throw new PGNParseException(token);
       }
     }
   }
@@ -346,7 +324,7 @@ public class PGNParser implements PGN {
     if (lastMove != null) {
       lastMove.setComment(token);
     } else {
-      throw new PGNParseException("Error near token: " + token);
+      throw new PGNParseException(token);
     }
   }
 
@@ -357,8 +335,7 @@ public class PGNParser implements PGN {
     return movesCount > 0 ? container.getMove(movesCount - 1) : null;
   }
 
-  static PGNMove parseMove(String move)
-      throws PGNParseException, IndexOutOfBoundsException {
+  static PGNMove parseMove(String move) throws PGNParseException {
     PGNMove pgnMove = new PGNMove();
     pgnMove.setFullMove(move);
 
@@ -416,8 +393,7 @@ public class PGNParser implements PGN {
           pgnMove.setPromoted(true);
           pgnMove.setPromotion(promotedPiece);
         } else {
-          throw new PGNParseException(
-              "Error near token: " + pgnMove.getFullMove());
+          throw new PGNParseException(pgnMove.getFullMove());
         }
       }
     }
@@ -459,7 +435,7 @@ public class PGNParser implements PGN {
         updateNextMove(move, state);
         state.switchPlayer();
       } else {
-        throw new PGNParseException("Error near token: " + token);
+        throw new PGNParseException(token);
       }
     }
   }

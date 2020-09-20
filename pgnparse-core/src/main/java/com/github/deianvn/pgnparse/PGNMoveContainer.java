@@ -1,16 +1,15 @@
-package pgnparse;
+package com.github.deianvn.pgnparse;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 public abstract class PGNMoveContainer {
 
-  private List<PGNMove> moves;
+  private final List<PGNMove> moves = new ArrayList<>();
 
   public PGNMoveContainer() {
-    moves = new LinkedList<PGNMove>();
   }
 
   void addMove(PGNMove move) {

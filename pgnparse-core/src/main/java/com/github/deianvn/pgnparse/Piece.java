@@ -1,4 +1,4 @@
-package pgnparse;
+package com.github.deianvn.pgnparse;
 
 public class Piece {
 
